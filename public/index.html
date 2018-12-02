@@ -10,17 +10,75 @@
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
   </style>
+  <style>
+      body {
+        margin:0;
+        padding:0;
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+      #map { position:absolute; top:0; bottom:0; width:100%; }
+    li {
+      padding: 3px 0;
+    }
+    #panel {
+      background: white;
+      width: 400px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.1);
+      color: rgba(0, 0, 0, 0.5);
+    }
+    h4 {
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      margin: 0;
+      padding: 16px;
+    }
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 16px;
+    }
+    ul span {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      margin-right: 8px;
+      border-radius: 50%;
+    }
+  </style>
 </head>
 <body>
 
 <div id='map'></div>
+<div id="panel">
+  <h4>Land Use</h4>
+  <ul>
+    <li><span style="background: #F9EDDB;"></span>One & Two Family Buildings</li>
+    <li><span style="background: #F6D9CB;"></span>Multi-Family Buildings</li>
+    <li><span style="background: #F1B89C;"></span>Mixed Residential & Commercial Buildings</li>
+    <li><span style="background: #DF7649;"></span>Commercial & Office Buildings</li>
+    <li><span style="background: #CF4F4F;"></span>Industrial & Manufacturing</li>
+    <li><span style="background: #BEC6CC;"></span>Transportation & Utility</li>
+    <li><span style="background: #BDE7F4;"></span>Public Facilities & Institutions</li>
+    <li><span style="background: #A3D393;"></span>Open Space & Outdoor Recreation</li>
+    <li><span style="background: #8DA2B4;"></span>Parking Facilities</li>
+    <li><span style="background: #E4E4E4;"></span>Vacant Land</li>
+    <li><span style="background: #F9F9F9; border: 1px solid #ccc; box-sizing: border-box;"></span>No Data</li>
+  </ul>
+</div>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoiYW1pdGx6a3BhIiwiYSI6ImNpZmN6ZW12ZzRvYTFzeG03ZDdkNzd5d2oifQ.FxgL_waU-ZRhhtQdeOvtcA';
   const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/amitlzkpa/cjp76fohb2iv62snufy0maxzp',
-    center: [-74.008864, 40.729640],
-    zoom: 15.8
+    center: [-73.990, 40.718],
+    zoom: 13,
+    minZoom: 13,
+    maxZoom: 18
   });
 </script>
 
