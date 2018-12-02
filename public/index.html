@@ -96,6 +96,59 @@
     '10': 'Parking Facilities',
     '11': 'Vacant Land'
   };
+  let bldgClassNames = {
+    'A0': 'Cape Cod',
+    'A1': 'Two Stories Detached (Small or Moderate Size, With or Without Attic)', 
+    'A2': 'One Story (Permanent Living Quarters)',
+    'A3': 'Large Suburban Residence',
+    'A4': 'City Residence',
+    'A5': 'Attached or Semi-Detached',
+    'A6': 'Summer Cottages',
+    'A7': 'Mansion Type or Town House',
+    'A8': 'Bungalow Colony/Land Coop Owned',
+    'A9': 'Miscellaneous',
+
+    'B1': 'Brick',
+    'B2': 'Frame',
+    'B3': 'Converted From One Family',
+    'B9': 'Miscellaneous',
+
+    'C0': 'Three Families',
+    'C1': 'Over Six Families Without Stores',
+    'C2': 'Five to Six Families',
+    'C3': 'Four Families',
+    'C4': 'Old Law Tenements',
+    'C5': 'Converted Dwelling or Rooming House',
+    'C6': 'Cooperativ:',
+    'C7': 'Over Six Families With Stores',
+    'C8': 'Co-Op Conversion From Loft/Warehouse',
+    'C9': 'Garden Apartments',
+
+    'D0': 'Co-op Conversion from Loft/Warehouse',
+    'D1': 'Semi-fireproof (Without Stores)',
+    'D2': 'Artists in Residence',
+    'D3': 'Fireproof (Without Stores)',
+    'D4': 'Cooperatives (Other Than Condominiums)',
+    'D5': 'Converted',
+    'D6': 'Fireproof With Stores',
+    'D7': 'Semi-Fireproof With Stores',
+    'D8': 'Luxury Type',
+    'D9': 'Miscellaneous',
+
+    'E1': 'Fireproof ',
+    'E2': 'Contractor’s Warehouse',
+    'E3': 'Semi-Fireproof',
+    'E4': 'Frame, Metal',
+    'E7': 'Warehouse, Self Storage',
+    'E9': 'Miscellaneous',
+
+    'F1': 'Heavy Manufacturing - Fireproof',
+    'F2': 'Special Construction - Fireproof',
+    'F4': 'Semi-Fireproof',
+    'F5': 'Light Manufacturing',
+    'F8': 'Tank Farms',
+    'F9': 'Miscellaneous'
+  }
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiYW1pdGx6a3BhIiwiYSI6ImNpZmN6ZW12ZzRvYTFzeG03ZDdkNzd5d2oifQ.FxgL_waU-ZRhhtQdeOvtcA';
   const map = new mapboxgl.Map({
@@ -135,6 +188,7 @@
     let features = map.queryRenderedFeatures(geometry, parameters);
 
     if(features.length > 0) {
+
       let lot = features[0];
 
       let ownerName = lot.properties.OwnerName || '—';
@@ -146,7 +200,7 @@
       let zipCode = lot.properties.ZipCode || '—';
       let landUse = landUseNames[lot.properties.LandUse] || '—';
       let zoneDist = lot.properties.ZoneDist1 || '—';
-      let bldgClass = lot.properties.BldgClass || '—';
+      let bldgClass = bldgClassNames[lot.properties.BldgClass] || '—';
       let yearBuilt = lot.properties.YearBuilt || '—';
 
       let schoolDist = lot.properties.SchoolDist || '—';
@@ -189,9 +243,9 @@
               <dd>${schoolDist}</dd>
               <dt>Fire Comp</dt>
               <dd>${fireComp}</dd>
-              <dt>Police Prct</dt>
+              <dt>Police Precint</dt>
               <dd>${policePrct}</dd>
-              <dt>Health Centre</dt>
+              <dt>Health Centre District</dt>
               <dd>${healthCent}</dd>
 
               <dt>Build FAR</dt>
