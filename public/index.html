@@ -108,6 +108,22 @@
     hash: true
   });
 
+  let nav = new mapboxgl.NavigationControl();
+  map.addControl(nav, 'top-left');
+
+
+  map.on('mousemove', function(event) {
+
+    if(map.loaded()) {
+      let geometry = event.point;
+      let parameters = {
+        layers: ['lots']
+      }
+      let features = map.queryRenderedFeatures(geometry, parameters);
+      map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+    }
+
+  });
 
   map.on('click', function(event) {
 
@@ -142,8 +158,6 @@
       let residFAR = lot.properties.ResidFAR || '—';
       let commFAR = lot.properties.CommFAR || '—';
       let facilFAR = lot.properties.FacilFAR || '—';
-
-
 
 
       let popUpHtml =
