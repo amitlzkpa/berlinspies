@@ -17,7 +17,7 @@
       font-size: 14px;
     }
 
-    #map { position:absolute; width:100%; height:900px; }
+    #map { position:absolute; width:100%; height:700px; }
     #go { position:absolute; top:20px; right:20px; width:300px; background-color: white; height: 20px; text-align: center; }
 
     .currPMarker {
@@ -91,6 +91,13 @@
         <br/>
         <a href="#!" id="playBtn" class="btn btn-primary float-right">Move</a>
       </div>
+      <div>
+        Icon credits:
+        <ul>
+          <li>Ninja by I Create Stuff from the Noun Project</li>
+          <li>Scared Police by Gan Khoon Lay from the Noun Project</li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
@@ -101,10 +108,6 @@
 </div>
 
 
-<div>
-  Ninja by I Create Stuff from the Noun Project<br/>
-  Scared Police by Gan Khoon Lay from the Noun Project
-</div>
 
 
 <script>
@@ -317,6 +320,7 @@ function pad(n){return n<10 ? '0'+n : n}
 
     let pos = JSON.parse(features[0].properties.data).location;
     players[currPIdx].location = pos;
+    render();
     // let name = features[0].properties.geographicalName;
     // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
     // let srcId = srcStnData.evaNumbers[0].number;
