@@ -1,12 +1,13 @@
 require('dotenv').config(); // read .env files
 const express = require('express');
 const cors = require('cors');
+const favicon = require('serve-favicon');
 
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(cors());
-
+app.use(favicon(__dirname + '/public/favicon.ico'));
 
 
 // Set public folder as root
