@@ -4,19 +4,39 @@
   <meta charset=utf-8 />
   <title>NYC Land Use</title>
   <meta name=viewport content=initial-scale=1,maximum-scale=1,user-scalable=no />
-  <script src=https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js></script>
-  <link href=https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css rel=stylesheet />
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
   <style>
     body {
       margin:0;
       padding:0;
       font-family: sans-serif;
       font-size: 14px;
-  }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-    li {
-      padding: 3px 0;
     }
+
+    #map { position:absolute; width:900px; height:900px; }
+    #go { position:absolute; top:20px; right:20px; width:300px; background-color: white; height: 20px; text-align: center; }
+
+    .currPMarker {
+      background-color: red;
+      border: 1px solid black;
+      width: 16px;
+      height: 16px;
+      /*cursor: pointer;*/
+    }
+
+    .choiceMarkers {
+      background-color: yellow;
+      border: 1px solid black;
+      width: 12px;
+      height: 12px;
+      cursor: pointer;
+    }
+
+
     #panel {
       background: white;
       width: 400px;
@@ -50,223 +70,229 @@
       margin-bottom: 8px;
       font-weight: bold;
     }
-    .mapboxgl-popup-content {
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.5);
-      min-width: 250px;
-      max-width: 400px;
-      box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.1);
-    }
-    dl {
-      margin-bottom: 0;
-    }
   </style>
 </head>
 <body>
 
-<div id=map></div>
-<div id="panel">
-  <h4>Land Use</h4>
-  <ul>
-    <li><span style="background: #F9EDDB;"></span>One & Two Family Buildings</li>
-    <li><span style="background: #F6D9CB;"></span>Multi-Family Buildings</li>
-    <li><span style="background: #F1B89C;"></span>Mixed Residential & Commercial Buildings</li>
-    <li><span style="background: #DF7649;"></span>Commercial & Office Buildings</li>
-    <li><span style="background: #CF4F4F;"></span>Industrial & Manufacturing</li>
-    <li><span style="background: #BEC6CC;"></span>Transportation & Utility</li>
-    <li><span style="background: #BDE7F4;"></span>Public Facilities & Institutions</li>
-    <li><span style="background: #A3D393;"></span>Open Space & Outdoor Recreation</li>
-    <li><span style="background: #8DA2B4;"></span>Parking Facilities</li>
-    <li><span style="background: #E4E4E4;"></span>Vacant Land</li>
-    <li><span style="background: #F9F9F9; border: 1px solid #ccc; box-sizing: border-box;"></span>No Data</li>
-  </ul>
+
+<div class="container">
+  <div class="row">
+    <div class="col-4">
+      <div>
+        <span>Time:</span>
+        <span id="currTime"></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+        <span>Curr Player:</span>
+        <span id="currPName"></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+        <span>Result:</span>
+        <span id="result"></span>
+        <a href="#!" id="playBtn" class="btn btn-primary float-right">Move</a>
+      </div>
+    </div>
+    <div class="col-8">
+      <div id="map"></div>
+    </div>
+  </div>
 </div>
+
+
+
+
+
 <script>
 
-  let landUseNames = {
-    '01': 'One & Two Family Buildings',
-    '02': 'Multi-Family Walk-Up Buildings',
-    '03': 'Multi-Family Elevator Buildings',
-    '04': 'Mixed Residential & Commercial Buildings',
-    '05': 'Commercial & Office Buildings',
-    '06': 'Industrial & Manufacturing',
-    '07': 'Transportation & Utility',
-    '08': 'Public Facilities & Institutions',
-    '09': 'Open Space & Outdoor Recreation',
-    '10': 'Parking Facilities',
-    '11': 'Vacant Land'
-  };
-  let bldgClassNames = {
-    'A0': 'Cape Cod',
-    'A1': 'Two Stories Detached (Small or Moderate Size, With or Without Attic)', 
-    'A2': 'One Story (Permanent Living Quarters)',
-    'A3': 'Large Suburban Residence',
-    'A4': 'City Residence',
-    'A5': 'Attached or Semi-Detached',
-    'A6': 'Summer Cottages',
-    'A7': 'Mansion Type or Town House',
-    'A8': 'Bungalow Colony/Land Coop Owned',
-    'A9': 'Miscellaneous',
 
-    'B1': 'Brick',
-    'B2': 'Frame',
-    'B3': 'Converted From One Family',
-    'B9': 'Miscellaneous',
 
-    'C0': 'Three Families',
-    'C1': 'Over Six Families Without Stores',
-    'C2': 'Five to Six Families',
-    'C3': 'Four Families',
-    'C4': 'Old Law Tenements',
-    'C5': 'Converted Dwelling or Rooming House',
-    'C6': 'Cooperativ:',
-    'C7': 'Over Six Families With Stores',
-    'C8': 'Co-Op Conversion From Loft/Warehouse',
-    'C9': 'Garden Apartments',
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
 
-    'D0': 'Co-op Conversion from Loft/Warehouse',
-    'D1': 'Semi-fireproof (Without Stores)',
-    'D2': 'Artists in Residence',
-    'D3': 'Fireproof (Without Stores)',
-    'D4': 'Cooperatives (Other Than Condominiums)',
-    'D5': 'Converted',
-    'D6': 'Fireproof With Stores',
-    'D7': 'Semi-Fireproof With Stores',
-    'D8': 'Luxury Type',
-    'D9': 'Miscellaneous',
+Date.prototype.addHours = function(hours) {
+    var date = new Date(this.valueOf());
+    date.setHours(date.getHours() + hours);
+    return date;
+}
 
-    'E1': 'Fireproof ',
-    'E2': 'Contractor’s Warehouse',
-    'E3': 'Semi-Fireproof',
-    'E4': 'Frame, Metal',
-    'E7': 'Warehouse, Self Storage',
-    'E9': 'Miscellaneous',
 
-    'F1': 'Heavy Manufacturing - Fireproof',
-    'F2': 'Special Construction - Fireproof',
-    'F4': 'Semi-Fireproof',
-    'F5': 'Light Manufacturing',
-    'F8': 'Tank Farms',
-    'F9': 'Miscellaneous'
-  }
+
+function getDistance(ptA, ptB) {
+  return Math.sqrt((Math.pow(ptB[0], 2) - Math.pow(ptA[0], 2)) + (Math.pow(ptB[1], 2) - Math.pow(ptA[1], 2)));
+}
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
+function pad(n){return n<10 ? '0'+n : n}
+
+
+
+
+
+
+
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiYW1pdGx6a3BhIiwiYSI6ImNpZmN6ZW12ZzRvYTFzeG03ZDdkNzd5d2oifQ.FxgL_waU-ZRhhtQdeOvtcA';
   const map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/amitlzkpa/cjp76fohb2iv62snufy0maxzp',
-    center: [-73.990, 40.718],
-    zoom: 13,
-    minZoom: 13,
+    style: 'mapbox://styles/amitlzkpa/cjpeiq18h09vb2rnakpt4twwh',
+    center: [9.68, 51.31],
+    zoom: 5.7,
+    minZoom: 0,
     maxZoom: 18,
-    hash: true
+    // hash: true
   });
 
   let nav = new mapboxgl.NavigationControl();
   map.addControl(nav, 'top-left');
 
 
-  map.on('mousemove', function(event) {
 
-    if(map.loaded()) {
-      let geometry = event.point;
-      let parameters = {
-        layers: ['lots']
-      }
-      let features = map.queryRenderedFeatures(geometry, parameters);
-      map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+
+
+
+
+
+
+
+  function Player(n, l, c) {
+    this.name = n;
+    this.location = l;
+    this.cash = c;
+  }
+
+
+
+  let players = [
+                  new Player("spy",   [13.492286, 52.636162],   100000),
+                  new Player("cop1",  [7.537458, 51.518768],    300),
+                  new Player("cop2",  [7.007252,51.48437],      300)
+                ]
+  let currPIdx = 0;
+  let currPMrkr = null;
+  let currTime = new Date(2018, 7, 1, 15, 0, 0, 0)
+  let currChoices = [];
+
+
+
+  let el = document.createElement('div');
+  el.className = 'currPMarker';
+  currPMrkr = new mapboxgl.Marker(el)
+                          .setLngLat(players[currPIdx].location)
+                          .addTo(map);
+  $("#currPName").text(players[currPIdx].name);
+  $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+
+
+
+  async function render() {
+
+
+    $.ajaxSetup({
+       headers:{
+          'Authorization': "Bearer cf9abb85d92fc7b061b8a4c936078e5a"
+       }
+    });
+
+    currPMrkr.remove();
+    let el = document.createElement('div');
+    el.className = 'currPMarker';
+    currPMrkr = new mapboxgl.Marker(el)
+                            .setLngLat(players[currPIdx].location)
+                            .addTo(map);
+
+    currChoices.forEach(m => m.remove());
+    currChoices = [];
+    let s = ['8000105', '8000001', '8000406']
+    let q = Math.floor(Math.random() * s.length);
+    let srcStnId = s[q];
+    srcStnId = '8000105';
+    let strtDt = `${currTime.getFullYear()}-${pad(currTime.getMonth())}-${pad(currTime.getDate())}T${pad(currTime.getHours())}:00`;
+    console.log(srcStnId);
+    console.log(strtDt);
+    let departures = (await $.get(`https://api.deutschebahn.com/fahrplan-plus/v1/departureBoard/${srcStnId}?date=${strtDt}`));
+    for(let i=0; i<3; i++) {
+      let dep = departures[i];
+      let dstName = dep.stopName;
+      dstName = dstName.replace('(', ' (').replace(')', ') ')
+      let dtId = dep.detailsId;
+      console.log(dtId);
+      let dstSTTTT = (await $.get(`https://api.deutschebahn.com/fahrplan-plus/v1/journeyDetails/${dtId}`));
+      console.log(dstSTTTT);
+      // let dstCode = dep.stopId;
+      // console.log(dep);
+      // console.log(dstCode);
+      // console.log('-----');
+      // let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${dstName}`))[0];
+      // let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?evaNumbers.number=${dstCode}`))[0];
+      
+      // let loc = dstStnData.evaNumbers[0].geographicCoordinates;
+
+      // let cel = document.createElement('div');
+      // cel.className = 'choiceMarkers';
+      // let mrkr = new mapboxgl.Marker(cel)
+      //                        .setLngLat(loc.coordinates)
+      //                        .addTo(map);
+      // currChoices.push(mrkr);
+    }
+    // console.log(currChoices);
+
+    if((getDistance(players[0].location, players[1].location) < 0.02)
+    || (getDistance(players[0].location, players[2].location) < 0.02)) {
+      $("#result").text('Game Over!!');
     }
 
-  });
+    currTime = currTime.addDays(1);
+    currTime = currTime.addHours(1);
+    currPIdx++;
+    currPIdx %= players.length;
+    $("#currPName").text(players[currPIdx].name);
+    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+  }
 
-  map.on('click', function(event) {
+
+  // render();
+
+
+
+  $("#playBtn").on('click', async function(event) {
+    render();
+  })
+
+
+
+
+
+  map.on('click', async function(event) {
 
     let geometry = event.point;
     let parameters = {
-      layers: ['lots']
+      // layers: ['railwaynodes', 'railwaystationnodes', 'railwaylines']
+      layers: ['railwaystationnodes']
     }
 
     let features = map.queryRenderedFeatures(geometry, parameters);
 
-    if(features.length > 0) {
+    if(features.length < 1) return;
 
-      let lot = features[0];
-
-      let ownerName = lot.properties.OwnerName || '—';
-      let lotNo = lot.properties.Lot || '—';
-      let block = lot.properties.Block || '—';
-      let numFloors = lot.properties.NumFloors || '—';
-      let unitsTotal = lot.properties.UnitsTotal || '—';
-
-      let zipCode = lot.properties.ZipCode || '—';
-      let landUse = landUseNames[lot.properties.LandUse] || '—';
-      let zoneDist = lot.properties.ZoneDist1 || '—';
-      let bldgClass = bldgClassNames[lot.properties.BldgClass] || '—';
-      let yearBuilt = lot.properties.YearBuilt || '—';
-
-      let schoolDist = lot.properties.SchoolDist || '—';
-      let fireComp = lot.properties.FireComp || '—';
-      let policePrct = lot.properties.PolicePrct || '—';
-      let healthCent = lot.properties.HealthCent || '—';
-
-      let buildFAR = lot.properties.BuildFAR || '—';
-      let residFAR = lot.properties.ResidFAR || '—';
-      let commFAR = lot.properties.CommFAR || '—';
-      let facilFAR = lot.properties.FacilFAR || '—';
-
-
-      let popUpHtml =
-        `
-          <dl>
-              <dt>Owner</dt>
-              <dd>${ownerName}</dd>
-              <dt>Block</dt>
-              <dd>${block}</dd>
-              <dt>Lot</dt>
-              <dd>${lotNo}</dd>
-              <dt>Floors</dt>
-              <dd>${numFloors}</dd>
-              <dt>Units</dt>
-              <dd>${unitsTotal}</dd>
-
-              <dt>ZipCode</dt>
-              <dd>${zipCode}</dd>
-              <dt>Land Use</dt>
-              <dd>${landUse}</dd>
-              <dt>Zone District</dt>
-              <dd>${zoneDist}</dd>
-              <dt>Building Class</dt>
-              <dd>${bldgClass}</dd>
-              <dt>Year Built</dt>
-              <dd>${yearBuilt}</dd>
-
-              <dt>School Dist</dt>
-              <dd>${schoolDist}</dd>
-              <dt>Fire Comp</dt>
-              <dd>${fireComp}</dd>
-              <dt>Police Precint</dt>
-              <dd>${policePrct}</dd>
-              <dt>Health Centre District</dt>
-              <dd>${healthCent}</dd>
-
-              <dt>Build FAR</dt>
-              <dd>${buildFAR}</dd>
-              <dt>Resid FAR</dt>
-              <dd>${residFAR}</dd>
-              <dt>Comm FAR</dt>
-              <dd>${commFAR}</dd>
-              <dt>Facil FAR</dt>
-              <dd>${facilFAR}</dd>
-            </dl>
-        `;
-
-      let popup = new mapboxgl.Popup()
-        .setLngLat(event.lngLat)
-        .setHTML(popUpHtml)
-        .addTo(map);
-
-    }
+    console.log(features);
+    // let name = features[0].properties.geographicalName;
+    // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
+    // let srcId = srcStnData.evaNumbers[0].number;
 
   });
+
+
 
 
 

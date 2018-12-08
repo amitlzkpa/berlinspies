@@ -1,8 +1,13 @@
 require('dotenv').config(); // read .env files
 const express = require('express');
+const cors = require('cors');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(cors());
+
+
 
 // Set public folder as root
 app.use(express.static('public'));
@@ -11,7 +16,7 @@ app.use(express.static('public'));
 app.use('/scripts', express.static(`${__dirname}/node_modules/`));
 
 // Redirect all traffic to index.html
-app.use((req, res) => res.sendFile(`${__dirname}/public/index.html`));
+app.all('/', (req, res) => res.sendFile(`${__dirname}/public/index.html`));
 
 // Listen for HTTP requests on port 3000
 app.listen(port, () => {
