@@ -101,7 +101,10 @@
 </div>
 
 
-
+<div>
+  Ninja by I Create Stuff from the Noun Project<br/>
+  Scared Police by Gan Khoon Lay from the Noun Project
+</div>
 
 
 <script>
@@ -212,7 +215,20 @@ function pad(n){return n<10 ? '0'+n : n}
     currChoices = [];
     let departures = (await $.get(`http://127.0.0.1:5000/DepartureBoard`)).Departure;
     let lim = [3, 8, 12][(Math.floor(Math.random() * 3))];
-    console.log(lim);
+
+    let addObj = 
+    {
+        "id": "jumpLayer",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        }
+    }
+
     for(let i=0; i<lim; i++) {
       let dep = departures[i];
       let dstName = dep.stop;
@@ -223,25 +239,54 @@ function pad(n){return n<10 ? '0'+n : n}
       
       let loc = dstStnData.evaNumbers[0].geographicCoordinates;
 
-      let cel = document.createElement('div');
-      cel.className = 'choiceMarkers';
-      let mrkr = new mapboxgl.Marker(cel)
-                             .setLngLat(loc.coordinates)
-                             .addTo(map);
-      currChoices.push(mrkr);
+      let addM = 
+          {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": loc.coordinates
+            },
+            "properties": {
+                "data": {
+                  "location": loc.coordinates
+                },
+            }
+          };
+      addObj.source.data.features.push(addM);
     }
+    if(typeof map.getLayer('jumpLayer') !== 'undefined')
+      map.removeLayer('jumpLayer').removeSource('jumpLayer');
+    let imgURL = (players[currPIdx].name.toLowerCase().indexOf('agent') > 0) ? '/icons/noun_Scared Police_1258357.png' : '/icons/noun_Ninja_23386.png';
+    map.loadImage(imgURL, function(error, image) {
+      if(error) {
+        console.log(error);
+        return;
+      }
+      map.addImage('jumpspot', image);
+      addObj["layout"] = {
+        "icon-image": "jumpspot",
+        "icon-size": 0.15,
+        "text-field": "{data.name}",
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0.6],
+        "text-anchor": "top"
+      }
+      map.addLayer(addObj);
 
-    if((getDistance(players[0].location, players[1].location) < 0.02)
-    || (getDistance(players[0].location, players[2].location) < 0.02)) {
-      $("#result").text('Game Over!!');
-    }
+      if((getDistance(players[0].location, players[1].location) < 0.02)
+      || (getDistance(players[0].location, players[2].location) < 0.02)) {
+        $("#result").text('Game Over!!');
+      }
 
-    currTime = currTime.addDays(1);
-    currTime = currTime.addHours(1);
-    currPIdx++;
-    currPIdx %= players.length;
-    $("#currPName").text(players[currPIdx].name);
-    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+      currTime = currTime.addDays(1);
+      currTime = currTime.addHours(1);
+      currPIdx++;
+      currPIdx %= players.length;
+      $("#currPName").text(players[currPIdx].name);
+      $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+
+    });
+
   }
 
 
@@ -262,14 +307,16 @@ function pad(n){return n<10 ? '0'+n : n}
     let geometry = event.point;
     let parameters = {
       // layers: ['railwaynodes', 'railwaystationnodes', 'railwaylines']
-      layers: ['railwaystationnodes']
+      // layers: ['railwaystationnodes']
+      layers: ['jumpLayer']
     }
 
     let features = map.queryRenderedFeatures(geometry, parameters);
 
     if(features.length < 1) return;
 
-    console.log(features);
+    let pos = JSON.parse(features[0].properties.data).location;
+    players[currPIdx].location = pos;
     // let name = features[0].properties.geographicalName;
     // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
     // let srcId = srcStnData.evaNumbers[0].number;
