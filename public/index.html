@@ -197,13 +197,6 @@ function pad(n){return n<10 ? '0'+n : n}
 
   async function render() {
 
-
-    $.ajaxSetup({
-       headers:{
-          'Authorization': "Bearer cf9abb85d92fc7b061b8a4c936078e5a"
-       }
-    });
-
     currPMrkr.remove();
     let el = document.createElement('div');
     el.className = 'currPMarker';
@@ -213,39 +206,26 @@ function pad(n){return n<10 ? '0'+n : n}
 
     currChoices.forEach(m => m.remove());
     currChoices = [];
-    let s = ['8000105', '8000001', '8000406']
-    let q = Math.floor(Math.random() * s.length);
-    let srcStnId = s[q];
-    srcStnId = '8000105';
-    let strtDt = `${currTime.getFullYear()}-${pad(currTime.getMonth())}-${pad(currTime.getDate())}T${pad(currTime.getHours())}:00`;
-    console.log(srcStnId);
-    console.log(strtDt);
-    let departures = (await $.get(`https://api.deutschebahn.com/fahrplan-plus/v1/departureBoard/${srcStnId}?date=${strtDt}`));
-    for(let i=0; i<3; i++) {
+    let departures = (await $.get(`http://127.0.0.1:5000/DepartureBoard`)).Departure;
+    let lim = [3, 8, 12][(Math.floor(Math.random() * 3))];
+    console.log(lim);
+    for(let i=0; i<lim; i++) {
       let dep = departures[i];
-      let dstName = dep.stopName;
-      dstName = dstName.replace('(', ' (').replace(')', ') ')
-      let dtId = dep.detailsId;
-      console.log(dtId);
-      let dstSTTTT = (await $.get(`https://api.deutschebahn.com/fahrplan-plus/v1/journeyDetails/${dtId}`));
-      console.log(dstSTTTT);
-      // let dstCode = dep.stopId;
-      // console.log(dep);
-      // console.log(dstCode);
-      // console.log('-----');
-      // let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${dstName}`))[0];
-      // let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?evaNumbers.number=${dstCode}`))[0];
+      let dstName = dep.stop;
+      dstName = dstName.replace('(', ' (').replace(')', ') ');
+      while(dstName.indexOf('  ') != -1)
+        dstName = dstName.replace('  ', ' ');
+      let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${dstName}`))[0];
       
-      // let loc = dstStnData.evaNumbers[0].geographicCoordinates;
+      let loc = dstStnData.evaNumbers[0].geographicCoordinates;
 
-      // let cel = document.createElement('div');
-      // cel.className = 'choiceMarkers';
-      // let mrkr = new mapboxgl.Marker(cel)
-      //                        .setLngLat(loc.coordinates)
-      //                        .addTo(map);
-      // currChoices.push(mrkr);
+      let cel = document.createElement('div');
+      cel.className = 'choiceMarkers';
+      let mrkr = new mapboxgl.Marker(cel)
+                             .setLngLat(loc.coordinates)
+                             .addTo(map);
+      currChoices.push(mrkr);
     }
-    // console.log(currChoices);
 
     if((getDistance(players[0].location, players[1].location) < 0.02)
     || (getDistance(players[0].location, players[2].location) < 0.02)) {
