@@ -259,15 +259,18 @@ function pad(n){return n<10 ? '0'+n : n}
     }
     if(typeof map.getLayer('jumpLayer') !== 'undefined')
       map.removeLayer('jumpLayer').removeSource('jumpLayer');
-    let imgURL = (players[currPIdx].name.toLowerCase().indexOf('agent') > 0) ? '/icons/noun_Scared Police_1258357.png' : '/icons/noun_Ninja_23386.png';
+    let onSpy = (players[currPIdx].name.toLowerCase().indexOf('agent') < 0);
+    let imgURL = onSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
+    console.log(imgURL);
     map.loadImage(imgURL, function(error, image) {
       if(error) {
         console.log(error);
         return;
       }
-      map.addImage('jumpspot', image);
+      let imgLbl = onSpy ? 'spyJumpLoc' : 'copJumpLoc';
+      map.addImage(imgLbl, image);
       addObj["layout"] = {
-        "icon-image": "jumpspot",
+        "icon-image": imgLbl,
         "icon-size": 0.15,
         "text-field": "{data.name}",
         "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
