@@ -41,7 +41,7 @@ fahrServer.listen(5000, () => {
 });
 
 
-const stnFile = './support_data/stada/local-server/stada_stations.json';
+const stnFile = './support_data/stada/stada_stations(cleaned).json';
 const stnServer = jsonServer.create();
  
 stnServer.use(middlewares);
