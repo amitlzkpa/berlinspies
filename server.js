@@ -23,3 +23,29 @@ app.all('/', (req, res) => res.sendFile(`${__dirname}/public/index.html`));
 app.listen(port, () => {
 	console.log('listening on %d', port);
 });
+
+
+
+
+const jsonServer = require('json-server');
+const middlewares = jsonServer.defaults()
+
+
+const fahrFile = './support_data/fahrplan/sample.json';
+const fahrServer = jsonServer.create();
+
+fahrServer.use(middlewares);
+fahrServer.use(jsonServer.router(fahrFile));
+fahrServer.listen(5000, () => {
+  console.log('JSON fahrServer is running')
+});
+
+
+const stnFile = './support_data/stada/local-server/stada_stations.json';
+const stnServer = jsonServer.create();
+ 
+stnServer.use(middlewares);
+stnServer.use(jsonServer.router(stnFile));
+stnServer.listen(4000, () => {
+  console.log('JSON stnServer is running')
+});
