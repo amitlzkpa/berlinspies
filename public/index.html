@@ -261,7 +261,6 @@ function pad(n){return n<10 ? '0'+n : n}
       map.removeLayer('jumpLayer').removeSource('jumpLayer');
     let onSpy = (players[currPIdx].name.toLowerCase().indexOf('agent') < 0);
     let imgURL = onSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
-    console.log(imgURL);
     map.loadImage(imgURL, function(error, image) {
       if(error) {
         console.log(error);
@@ -316,6 +315,9 @@ function pad(n){return n<10 ? '0'+n : n}
       // layers: ['railwaystationnodes']
       layers: ['jumpLayer']
     }
+
+    var mapLayer = map.getLayer('jumpLayer');
+    if(typeof mapLayer === 'undefined') return;
 
     let features = map.queryRenderedFeatures(geometry, parameters);
 
