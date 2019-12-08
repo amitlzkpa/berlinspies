@@ -194,23 +194,28 @@ function pad(n){return n<10 ? '0'+n : n}
 
 
 
-  function Player(n, l, c, data) {
-    this.name = n;
-    this.location = l;
-    this.cash = c;
+  function Player(name, startLoc, type, startCash, data) {
+    this.name = name;
+    this.location = startLoc;
+    this.type = type || 'cop';
+    this.cash = startCash || 100;
     this.data = data || {};
   }
 
 
 
   let players = [
-                  new Player("The Spy from Lesotho 🕵️",   [13.492286, 52.636162],   100000),
-                  new Player("Allied Agent",  [7.537458, 51.518768],    300),
-                  new Player("Axis Agent",  [7.007252,51.48437],      300)
+                  new Player("The Spy from Lesotho 🕵️", [13.492286, 52.636162], 'spy', 100000),
+                  new Player("Allied Agent",  [7.537458, 51.518768], 'cop', 300),
+                  new Player("Axis Agent",  [7.007252,51.48437], 'cop', 300)
                 ]
+  
+                
   let currPIdx = 0;
   let currPMrkr = null;
   let currTime = new Date(1979, 1, 1, 0, 0, 0, 0)
+  let turnIndex = 0;
+  
   let currChoices = [];
 
 
@@ -233,7 +238,6 @@ function pad(n){return n<10 ? '0'+n : n}
     currChoices = [];
 
     // update board with current players location
-    console.log(players[currPIdx]);
     let el = document.createElement('div');
     el.className = 'currPMarker';
     currPMrkr = new mapboxgl.Marker(el)
@@ -246,6 +250,23 @@ function pad(n){return n<10 ? '0'+n : n}
       .setPopup(new mapboxgl.Popup({ offset: 25 })
         .setHTML(playerPopup))
       .addTo(map);
+
+
+
+    let isSpy = (players[currPIdx].type === 'spy');
+
+    // if spy
+      // show name and cash
+      // show all cops
+      // show spy
+
+    // if cop
+      // show name and cash
+      // show all cops
+      // show spy if 15th turn
+
+
+
 
     // get list of departures available to current player
     let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
@@ -294,25 +315,13 @@ function pad(n){return n<10 ? '0'+n : n}
     if(typeof map.getLayer('jumpLayer') !== 'undefined')
       map.removeLayer('jumpLayer').removeSource('jumpLayer');
     
-
-    // if spy
-      // show name and cash
-      // show all cops
-      // show spy
-
-    // if cop
-      // show name and cash
-      // show all cops
-      // show spy if 15th turn
-
     
-    let onSpy = (players[currPIdx].name.toLowerCase().indexOf('agent') < 0);
-    let imgURL = onSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
+    let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
     map.loadImage(imgURL, function(error, image) {
       if(error) {
         return;
       }
-      let imgLbl = onSpy ? 'spyJumpLoc' : 'copJumpLoc';
+      let imgLbl = isSpy ? 'spyJumpLoc' : 'copJumpLoc';
       map.addImage(imgLbl, image);
       addObj["layout"] = {
         "icon-image": imgLbl,
@@ -345,7 +354,7 @@ function pad(n){return n<10 ? '0'+n : n}
   }
 
 
-  // render();
+  render();
 
 
 
