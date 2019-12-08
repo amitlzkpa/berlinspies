@@ -31,9 +31,10 @@
 
     .choiceMarkers {
       background-color: yellow;
-      border: 1px solid black;
-      width: 12px;
-      height: 12px;
+      border: 2px solid black;
+      border-radius: 9px;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
     }
 
@@ -236,6 +237,8 @@ function pad(n){return n<10 ? '0'+n : n}
 
   async function render() {
 
+    console.log(turnIdx);
+    
     // clear board
     currPMrkr.remove();
     currChoices.forEach(m => m.remove());
@@ -259,8 +262,16 @@ function pad(n){return n<10 ? '0'+n : n}
       .addTo(map);
 
 
-
     let isSpy = (players[currPIdx].type === 'spy');
+    
+
+    let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
+
+
+    // get list of departures available to current player
+    let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
+    let lim = [3, 8, 12][(Math.floor(Math.random() * 3))]; // number of trains out
+
 
     // if spy
       // show name and cash
@@ -273,25 +284,6 @@ function pad(n){return n<10 ? '0'+n : n}
       // show spy if 15th turn
 
 
-
-
-    // get list of departures available to current player
-    let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
-    let lim = [3, 8, 12][(Math.floor(Math.random() * 3))]; // number of trains out
-
-    let addObj = 
-    {
-        "id": "jumpLayer",
-        "type": "symbol",
-        "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": []
-            }
-        }
-    }
-
     // update board with available options
     for(let i=0; i<lim; i++) {
       let dep = departures[i];
@@ -302,46 +294,23 @@ function pad(n){return n<10 ? '0'+n : n}
       let dstStnData = (await $.get(`/stn/stations?name=${dstName}`))[0];
       
       let loc = dstStnData.evaNumbers[0].geographicCoordinates;
+      
 
-      let addM = 
-          {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": loc.coordinates
-            },
-            "properties": {
-                "data": {
-                  "location": loc.coordinates
-                },
-            }
-          };
-      addObj.source.data.features.push(addM);
+      let chMarkerEl = document.createElement('div');
+      chMarkerEl.className = 'choiceMarkers';
+      let chMrkr = new mapboxgl.Marker(chMarkerEl)
+                              .setLngLat(loc.coordinates)
+                              .addTo(map);
+
+      let choicePopup = `<h4>${dstName}</h4><br /><p>Price: ${dstStnData.priceCategory * 100}</p>`;
+      new mapboxgl.Marker(chMarkerEl)
+        .setLngLat(loc.coordinates)
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+          .setHTML(choicePopup))
+        .addTo(map);
+
     }
 
-    if(typeof map.getLayer('jumpLayer') !== 'undefined')
-      map.removeLayer('jumpLayer').removeSource('jumpLayer');
-
-      
-      
-
-    // update board with current move choices
-    // let el = document.createElement('div');
-    // el.className = 'currPMarker';
-    // currPMrkr = new mapboxgl.Marker(el)
-    //                         .setLngLat(players[currPIdx].location)
-    //                         .addTo(map);
-
-    // let playerPopup = `<h4>${players[currPIdx].name}</h4><br /><p>Cash: ${players[currPIdx].cash}</p>`;
-    // new mapboxgl.Marker(el)
-    //   .setLngLat(players[currPIdx].location)
-    //   .setPopup(new mapboxgl.Popup({ offset: 25 })
-    //     .setHTML(playerPopup))
-    //   .addTo(map);
-
-      
-    
-    let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
     
 
     // check if caught
