@@ -87,6 +87,9 @@
         <span>Curr Player:</span>
         <span id="currPName"></span>
         &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+        <span>Cash:</span>
+        <span id="currPCash"></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
         <span>Result:</span>
         <span id="result"></span>
         <br/>
@@ -214,7 +217,7 @@ function pad(n){return n<10 ? '0'+n : n}
   let currPIdx = 0;
   let currPMrkr = null;
   let currTime = new Date(1979, 1, 1, 0, 0, 0, 0)
-  let turnIndex = 0;
+  let turnIdx = 0;
   
   let currChoices = [];
 
@@ -226,6 +229,7 @@ function pad(n){return n<10 ? '0'+n : n}
                           .setLngLat(players[currPIdx].location)
                           .addTo(map);
   $("#currPName").text(players[currPIdx].name);
+  $("#currPCash").text(players[currPIdx].cash);
   $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
 
 
@@ -237,7 +241,10 @@ function pad(n){return n<10 ? '0'+n : n}
     currChoices.forEach(m => m.remove());
     currChoices = [];
 
-    // update board with current players location
+    // update board with current players details
+    $("#currPName").text(players[currPIdx].name);
+    $("#currPCash").text(players[currPIdx].cash);
+
     let el = document.createElement('div');
     el.className = 'currPMarker';
     currPMrkr = new mapboxgl.Marker(el)
@@ -314,42 +321,43 @@ function pad(n){return n<10 ? '0'+n : n}
 
     if(typeof map.getLayer('jumpLayer') !== 'undefined')
       map.removeLayer('jumpLayer').removeSource('jumpLayer');
-    
+
+      
+      
+
+    // update board with current move choices
+    // let el = document.createElement('div');
+    // el.className = 'currPMarker';
+    // currPMrkr = new mapboxgl.Marker(el)
+    //                         .setLngLat(players[currPIdx].location)
+    //                         .addTo(map);
+
+    // let playerPopup = `<h4>${players[currPIdx].name}</h4><br /><p>Cash: ${players[currPIdx].cash}</p>`;
+    // new mapboxgl.Marker(el)
+    //   .setLngLat(players[currPIdx].location)
+    //   .setPopup(new mapboxgl.Popup({ offset: 25 })
+    //     .setHTML(playerPopup))
+    //   .addTo(map);
+
+      
     
     let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
-    map.loadImage(imgURL, function(error, image) {
-      if(error) {
-        return;
-      }
-      let imgLbl = isSpy ? 'spyJumpLoc' : 'copJumpLoc';
-      map.addImage(imgLbl, image);
-      addObj["layout"] = {
-        "icon-image": imgLbl,
-        "icon-size": 0.15,
-        "text-field": "{data.name}",
-        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-        "text-offset": [0, 0.6],
-        "text-anchor": "top"
-      }
-      map.addLayer(addObj);
+    
 
+    // check if caught
+    // update with results
 
-      // check if caught
-      // update with results
+    if((getDistance(players[0].location, players[1].location) < 0.02)
+    || (getDistance(players[0].location, players[2].location) < 0.02)) {
+      $("#result").text('Game Over!!');
+    }
 
-      if((getDistance(players[0].location, players[1].location) < 0.02)
-      || (getDistance(players[0].location, players[2].location) < 0.02)) {
-        $("#result").text('Game Over!!');
-      }
-
-      currTime = currTime.addDays(1);
-      currTime = currTime.addHours(1);
-      currPIdx++;
-      currPIdx %= players.length;
-      $("#currPName").text(players[currPIdx].name);
-      $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
-
-    });
+    currTime = currTime.addDays(1);
+    currTime = currTime.addHours(1);
+    currPIdx++;
+    currPIdx %= players.length;
+    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+    turnIdx++;
 
   }
 
