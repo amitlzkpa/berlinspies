@@ -233,17 +233,16 @@ function pad(n){return n<10 ? '0'+n : n}
     currChoices = [];
 
     // update board with current players location
-    let currP = players[currPIdx];
-    console.log(currP);
+    console.log(players[currPIdx]);
     let el = document.createElement('div');
     el.className = 'currPMarker';
     currPMrkr = new mapboxgl.Marker(el)
-                            .setLngLat(currP.location)
+                            .setLngLat(players[currPIdx].location)
                             .addTo(map);
 
-    let playerPopup = `<h4>${currP.name}</h4><br /><p>Cash: ${currP.cash}</p>`;
+    let playerPopup = `<h4>${players[currPIdx].name}</h4><br /><p>Cash: ${players[currPIdx].cash}</p>`;
     new mapboxgl.Marker(el)
-      .setLngLat(currP.location)
+      .setLngLat(players[currPIdx].location)
       .setPopup(new mapboxgl.Popup({ offset: 25 })
         .setHTML(playerPopup))
       .addTo(map);
