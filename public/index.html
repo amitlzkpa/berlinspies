@@ -23,9 +23,9 @@
     .currPMarker {
       background-color: red;
       border: 2px solid black;
-      border-radius: 8px;
-      width: 16px;
-      height: 16px;
+      border-radius: 12px;
+      width: 24px;
+      height: 24px;
       /*cursor: pointer;*/
     }
 
@@ -219,12 +219,12 @@ function sleep(milliseconds) {
   
                 
   let currPIdx = 0;
-  let currTime = new Date(1979, 1, 1, 0, 0, 0, 0)
+  let currTime = new Date(1970, 0, 0, 0, 0, 0, 0)
   let turnIdx = 0;
   
   let currChoices = [];
   let currPMrkr = null;
-  let activePopups = [];
+  let choicePopups = [];
 
 
 
@@ -255,15 +255,13 @@ function sleep(milliseconds) {
     if(currPMrkr) currPMrkr.remove();
     currChoices.forEach(m => m.remove());
     currChoices = [];
-    activePopups.forEach(m => m.remove());
-    activePopups = [];
+    choicePopups.forEach(m => m.remove());
+    choicePopups = [];
   }
 
 
   async function render() {
 
-    console.log(turnIdx);
-    
     // clear board
     await clear();
     
@@ -292,7 +290,7 @@ function sleep(milliseconds) {
 
 
     let isSpy = (players[currPIdx].type === 'spy');
-    let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
+    // let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
 
 
     // get list of departures available to current player
@@ -318,19 +316,19 @@ function sleep(milliseconds) {
                               .setLngLat(loc.coordinates)
                               .addTo(map);
 
-      let choicePopup = `<h4>${dstName}</h4>
+      let choicePopupHtml = `<h4>${dstName}</h4>
                         <br />
                         <p>Price: ${dstStnData.priceCategory * 100}</p>
                         <br />
                         <button class="btn btn-primary"
                                 onclick="jumpHere([${loc.coordinates[0]}, ${loc.coordinates[1]}])">Move Here</button>`;
-      let activePopup = new mapboxgl.Popup({ offset: 25 })
-                        .setHTML(choicePopup);
-      activePopups.push(activePopup);
+      let choicePopup = new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(choicePopupHtml);
+      choicePopups.push(choicePopup);
       
       new mapboxgl.Marker(chMarkerEl)
         .setLngLat(loc.coordinates)
-        .setPopup(activePopup)
+        .setPopup(choicePopup)
         .addTo(map);
       
     }
@@ -356,6 +354,8 @@ function sleep(milliseconds) {
 
   }
 
+
+  render();
 
 
 </script>
