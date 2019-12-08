@@ -216,7 +216,7 @@ function pad(n){return n<10 ? '0'+n : n}
 
     currChoices.forEach(m => m.remove());
     currChoices = [];
-    let departures = (await $.get(`http://127.0.0.1:5000/DepartureBoard`)).Departure;
+    let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
     let lim = [3, 8, 12][(Math.floor(Math.random() * 3))];
 
     let addObj = 
@@ -238,7 +238,7 @@ function pad(n){return n<10 ? '0'+n : n}
       dstName = dstName.replace('(', ' (').replace(')', ') ');
       while(dstName.indexOf('  ') != -1)
         dstName = dstName.replace('  ', ' ');
-      let dstStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${dstName}`))[0];
+      let dstStnData = (await $.get(`/stn/stations?name=${dstName}`))[0];
       
       let loc = dstStnData.evaNumbers[0].geographicCoordinates;
 
