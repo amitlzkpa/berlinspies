@@ -94,7 +94,7 @@
         <span>Result:</span>
         <span id="result"></span>
         <br/>
-        <a href="#!" id="playBtn" class="btn btn-primary float-right">Move</a>
+        <a href="#!" id="skipBtn" class="btn float-right">Skip</a>
       </div>
     </div>
   </div>
@@ -157,6 +157,9 @@ function shuffle(a) {
 
 function pad(n){return n<10 ? '0'+n : n}
 
+function sleep(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 
 
 
@@ -209,30 +212,27 @@ function pad(n){return n<10 ? '0'+n : n}
 
 
   let players = [
-                  new Player("The Spy from Lesotho 🕵️", [13.492286, 52.636162], 'spy', 100000),
-                  new Player("Allied Agent",  [7.537458, 51.518768], 'cop', 300),
-                  new Player("Axis Agent",  [7.007252,51.48437], 'cop', 300)
-                ]
+                  new Player("The Spy from Lesotho 🕵️", [13.492286, 52.636162], 'spy', 10000),
+                  new Player("Allied Agent",  [7.537458, 51.518768], 'cop', 1000),
+                  new Player("Axis Agent",  [7.007252,51.48437], 'cop', 1000)
+                ];
   
                 
   let currPIdx = 0;
-  let currPMrkr = null;
   let currTime = new Date(1979, 1, 1, 0, 0, 0, 0)
   let turnIdx = 0;
   
   let currChoices = [];
+  let currPMrkr = null;
+  let activePopups = [];
 
 
 
-  let el = document.createElement('div');
-  el.className = 'currPMarker';
-  currPMrkr = new mapboxgl.Marker(el)
-                          .setLngLat(players[currPIdx].location)
-                          .addTo(map);
-  $("#currPName").text(players[currPIdx].name);
-  $("#currPCash").text(players[currPIdx].cash);
-  $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
-
+      
+  function jumpHere(pos) {
+    players[currPIdx].location = pos;
+    render();
+  }
 
 
   async function render() {
@@ -240,37 +240,85 @@ function pad(n){return n<10 ? '0'+n : n}
     console.log(turnIdx);
     
     // clear board
-    currPMrkr.remove();
+    if(currPMrkr) currPMrkr.remove();
     currChoices.forEach(m => m.remove());
     currChoices = [];
+    activePopups.forEach(m => m.remove());
+    activePopups = [];
+
+    // increment counter and update current player
+    currTime = currTime.addDays(1);
+    currTime = currTime.addHours(1);
+    currPIdx++;
+    currPIdx %= players.length;
+    turnIdx++;
+    // console.log(turnIdx);
+
 
     // update board with current players details
-    $("#currPName").text(players[currPIdx].name);
-    $("#currPCash").text(players[currPIdx].cash);
-
-    let el = document.createElement('div');
-    el.className = 'currPMarker';
-    currPMrkr = new mapboxgl.Marker(el)
+    let currPMkEl = document.createElement('div');
+    currPMkEl.className = 'currPMarker';
+    currPMrkr = new mapboxgl.Marker(currPMkEl)
                             .setLngLat(players[currPIdx].location)
                             .addTo(map);
+    $("#currPName").text(players[currPIdx].name);
+    $("#currPCash").text(players[currPIdx].cash);
+    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
 
-    let playerPopup = `<h4>${players[currPIdx].name}</h4><br /><p>Cash: ${players[currPIdx].cash}</p>`;
-    new mapboxgl.Marker(el)
+
+    let playerPopup = `<h4>${players[currPIdx].name}</h4>
+                       <br />
+                       <p>Cash: ${players[currPIdx].cash}</p>`;
+    new mapboxgl.Marker(currPMkEl)
       .setLngLat(players[currPIdx].location)
       .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML(playerPopup))
+      .setHTML(playerPopup))
       .addTo(map);
 
 
     let isSpy = (players[currPIdx].type === 'spy');
-    
-
     let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
 
 
     // get list of departures available to current player
     let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
     let lim = [3, 8, 12][(Math.floor(Math.random() * 3))]; // number of trains out
+
+
+    // update board with available options
+    for(let i=0; i<lim; i++) {
+      let dep = departures[i];
+      // console.log(dep);
+      let dstName = dep.stop;
+      dstName = dstName.replace('(', ' (').replace(')', ') ');
+      while(dstName.indexOf('  ') != -1)
+        dstName = dstName.replace('  ', ' ');
+      let dstStnData = (await $.get(`/stn/stations?name=${dstName}`))[0];
+      
+      let loc = dstStnData.evaNumbers[0].geographicCoordinates;
+
+      let chMarkerEl = document.createElement('div');
+      chMarkerEl.className = 'choiceMarkers';
+      let chMrkr = new mapboxgl.Marker(chMarkerEl)
+                              .setLngLat(loc.coordinates)
+                              .addTo(map);
+
+      let choicePopup = `<h4>${dstName}</h4>
+                        <br />
+                        <p>Price: ${dstStnData.priceCategory * 100}</p>
+                        <br />
+                        <button class="btn btn-primary"
+                                onclick="jumpHere([${loc.coordinates[0]}, ${loc.coordinates[1]}])">Move Here</button>`;
+      let activePopup = new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(choicePopup);
+      activePopups.push(activePopup);
+      
+      new mapboxgl.Marker(chMarkerEl)
+        .setLngLat(loc.coordinates)
+        .setPopup(activePopup)
+        .addTo(map);
+      
+    }
 
 
     // if spy
@@ -282,60 +330,23 @@ function pad(n){return n<10 ? '0'+n : n}
       // show name and cash
       // show all cops
       // show spy if 15th turn
-
-
-    // update board with available options
-    for(let i=0; i<lim; i++) {
-      let dep = departures[i];
-      let dstName = dep.stop;
-      dstName = dstName.replace('(', ' (').replace(')', ') ');
-      while(dstName.indexOf('  ') != -1)
-        dstName = dstName.replace('  ', ' ');
-      let dstStnData = (await $.get(`/stn/stations?name=${dstName}`))[0];
-      
-      let loc = dstStnData.evaNumbers[0].geographicCoordinates;
-      
-
-      let chMarkerEl = document.createElement('div');
-      chMarkerEl.className = 'choiceMarkers';
-      let chMrkr = new mapboxgl.Marker(chMarkerEl)
-                              .setLngLat(loc.coordinates)
-                              .addTo(map);
-
-      let choicePopup = `<h4>${dstName}</h4><br /><p>Price: ${dstStnData.priceCategory * 100}</p>`;
-      new mapboxgl.Marker(chMarkerEl)
-        .setLngLat(loc.coordinates)
-        .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML(choicePopup))
-        .addTo(map);
-
-    }
-
     
 
     // check if caught
     // update with results
-
     if((getDistance(players[0].location, players[1].location) < 0.02)
     || (getDistance(players[0].location, players[2].location) < 0.02)) {
       $("#result").text('Game Over!!');
     }
 
-    currTime = currTime.addDays(1);
-    currTime = currTime.addHours(1);
-    currPIdx++;
-    currPIdx %= players.length;
-    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
-    turnIdx++;
-
   }
 
 
-  render();
+  // render();
 
 
 
-  $("#playBtn").on('click', async function(event) {
+  $("#skipBtn").on('click', async function(event) {
     render();
   })
 
@@ -343,30 +354,30 @@ function pad(n){return n<10 ? '0'+n : n}
 
 
 
-  map.on('click', async function(event) {
+  // map.on('click', async function(event) {
 
-    let geometry = event.point;
-    let parameters = {
-      // layers: ['railwaynodes', 'railwaystationnodes', 'railwaylines']
-      // layers: ['railwaystationnodes']
-      layers: ['jumpLayer']
-    }
+  //   let geometry = event.point;
+  //   let parameters = {
+  //     // layers: ['railwaynodes', 'railwaystationnodes', 'railwaylines']
+  //     // layers: ['railwaystationnodes']
+  //     layers: ['jumpLayer']
+  //   }
 
-    var mapLayer = map.getLayer('jumpLayer');
-    if(typeof mapLayer === 'undefined') return;
+  //   var mapLayer = map.getLayer('jumpLayer');
+  //   if(typeof mapLayer === 'undefined') return;
 
-    let features = map.queryRenderedFeatures(geometry, parameters);
+  //   let features = map.queryRenderedFeatures(geometry, parameters);
 
-    if(features.length < 1) return;
+  //   if(features.length < 1) return;
 
-    let pos = JSON.parse(features[0].properties.data).location;
-    players[currPIdx].location = pos;
-    render();
-    // let name = features[0].properties.geographicalName;
-    // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
-    // let srcId = srcStnData.evaNumbers[0].number;
+  //   let pos = JSON.parse(features[0].properties.data).location;
+  //   players[currPIdx].location = pos;
+  //   render();
+  //   // let name = features[0].properties.geographicalName;
+  //   // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
+  //   // let srcId = srcStnData.evaNumbers[0].number;
 
-  });
+  // });
 
 
 
