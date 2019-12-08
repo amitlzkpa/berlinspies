@@ -22,7 +22,8 @@
 
     .currPMarker {
       background-color: red;
-      border: 1px solid black;
+      border: 2px solid black;
+      border-radius: 8px;
       width: 16px;
       height: 16px;
       /*cursor: pointer;*/
@@ -226,17 +227,30 @@ function pad(n){return n<10 ? '0'+n : n}
 
   async function render() {
 
+    // clear board
     currPMrkr.remove();
+    currChoices.forEach(m => m.remove());
+    currChoices = [];
+
+    // update board with current players location
+    let currP = players[currPIdx];
+    console.log(currP);
     let el = document.createElement('div');
     el.className = 'currPMarker';
     currPMrkr = new mapboxgl.Marker(el)
-                            .setLngLat(players[currPIdx].location)
+                            .setLngLat(currP.location)
                             .addTo(map);
 
-    currChoices.forEach(m => m.remove());
-    currChoices = [];
+    let playerPopup = `<h4>${currP.name}</h4><br /><p>Cash: ${currP.cash}</p>`;
+    new mapboxgl.Marker(el)
+      .setLngLat(currP.location)
+      .setPopup(new mapboxgl.Popup({ offset: 25 })
+        .setHTML(playerPopup))
+      .addTo(map);
+
+    // get list of departures available to current player
     let departures = (await $.get(`/fahr/DepartureBoard`)).Departure;
-    let lim = [3, 8, 12][(Math.floor(Math.random() * 3))];
+    let lim = [3, 8, 12][(Math.floor(Math.random() * 3))]; // number of trains out
 
     let addObj = 
     {
@@ -251,6 +265,7 @@ function pad(n){return n<10 ? '0'+n : n}
         }
     }
 
+    // update board with available options
     for(let i=0; i<lim; i++) {
       let dep = departures[i];
       let dstName = dep.stop;
@@ -276,13 +291,26 @@ function pad(n){return n<10 ? '0'+n : n}
           };
       addObj.source.data.features.push(addM);
     }
+
     if(typeof map.getLayer('jumpLayer') !== 'undefined')
       map.removeLayer('jumpLayer').removeSource('jumpLayer');
+    
+
+    // if spy
+      // show name and cash
+      // show all cops
+      // show spy
+
+    // if cop
+      // show name and cash
+      // show all cops
+      // show spy if 15th turn
+
+    
     let onSpy = (players[currPIdx].name.toLowerCase().indexOf('agent') < 0);
     let imgURL = onSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
     map.loadImage(imgURL, function(error, image) {
       if(error) {
-        console.log(error);
         return;
       }
       let imgLbl = onSpy ? 'spyJumpLoc' : 'copJumpLoc';
@@ -296,6 +324,10 @@ function pad(n){return n<10 ? '0'+n : n}
         "text-anchor": "top"
       }
       map.addLayer(addObj);
+
+
+      // check if caught
+      // update with results
 
       if((getDistance(players[0].location, players[1].location) < 0.02)
       || (getDistance(players[0].location, players[2].location) < 0.02)) {
