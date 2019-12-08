@@ -229,9 +229,34 @@ function sleep(milliseconds) {
 
 
       
-  function jumpHere(pos) {
+  async function jumpHere(pos) {
     players[currPIdx].location = pos;
-    render();
+    await moveCounters();
+    await render();
+  }
+
+
+  $("#skipBtn").on('click', async function(event) {
+    await moveCounters();
+    await render();
+  })
+
+
+  function moveCounters() {
+    currTime = currTime.addDays(1);
+    currTime = currTime.addHours(1);
+    currPIdx++;
+    currPIdx %= players.length;
+    turnIdx++;
+  }
+
+
+  async function clear() {
+    if(currPMrkr) currPMrkr.remove();
+    currChoices.forEach(m => m.remove());
+    currChoices = [];
+    activePopups.forEach(m => m.remove());
+    activePopups = [];
   }
 
 
@@ -240,20 +265,10 @@ function sleep(milliseconds) {
     console.log(turnIdx);
     
     // clear board
-    if(currPMrkr) currPMrkr.remove();
-    currChoices.forEach(m => m.remove());
-    currChoices = [];
-    activePopups.forEach(m => m.remove());
-    activePopups = [];
-
-    // increment counter and update current player
-    currTime = currTime.addDays(1);
-    currTime = currTime.addHours(1);
-    currPIdx++;
-    currPIdx %= players.length;
-    turnIdx++;
-    // console.log(turnIdx);
-
+    await clear();
+    
+    console.log(turnIdx);
+    console.log(players[currPIdx]);
 
     // update board with current players details
     let currPMkEl = document.createElement('div');
@@ -340,46 +355,6 @@ function sleep(milliseconds) {
     }
 
   }
-
-
-  // render();
-
-
-
-  $("#skipBtn").on('click', async function(event) {
-    render();
-  })
-
-
-
-
-
-  // map.on('click', async function(event) {
-
-  //   let geometry = event.point;
-  //   let parameters = {
-  //     // layers: ['railwaynodes', 'railwaystationnodes', 'railwaylines']
-  //     // layers: ['railwaystationnodes']
-  //     layers: ['jumpLayer']
-  //   }
-
-  //   var mapLayer = map.getLayer('jumpLayer');
-  //   if(typeof mapLayer === 'undefined') return;
-
-  //   let features = map.queryRenderedFeatures(geometry, parameters);
-
-  //   if(features.length < 1) return;
-
-  //   let pos = JSON.parse(features[0].properties.data).location;
-  //   players[currPIdx].location = pos;
-  //   render();
-  //   // let name = features[0].properties.geographicalName;
-  //   // let srcStnData = (await $.get(`http://127.0.0.1:4000/stations?name=${name}`))[0];
-  //   // let srcId = srcStnData.evaNumbers[0].number;
-
-  // });
-
-
 
 
 
