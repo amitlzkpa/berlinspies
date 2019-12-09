@@ -29,9 +29,9 @@
     .choiceMarkers {
       background-color: yellow;
       border: 2px solid black;
-      border-radius: 6px;
-      width: 12px;
-      height: 12px;
+      border-radius: 9px;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
     }
 
@@ -213,7 +213,7 @@ function sleep(milliseconds) {
   
                 
   let currPIdx = 0;
-  let currTime = new Date(1970, 0, 0, 0, 0, 0, 0)
+  let currTime = new Date(1942, 11, 9, 0, 0, 0, 0)
   let turnIdx = 0;
   
   let currChoices = [];
@@ -278,7 +278,7 @@ function sleep(milliseconds) {
                             .addTo(map);
     $("#currPName").text(players[currPIdx].name);
     $("#currPCash").text(players[currPIdx].cash);
-    $("#currTime").text(`${currTime.toDateString()} ${currTime.getHours()}:00`);
+    $("#currTime").text(`${currTime.toDateString()}`);
 
 
     let playerPopup = `<h4>${players[currPIdx].name}</h4>
