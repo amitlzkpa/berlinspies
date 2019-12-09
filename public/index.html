@@ -24,17 +24,33 @@
       border-radius: 12px;
       width: 24px;
       height: 24px;
-      /*cursor: pointer;*/
     }
 
     .choiceMarkers {
       background-color: yellow;
       border: 2px solid black;
-      border-radius: 9px;
-      width: 18px;
-      height: 18px;
+      border-radius: 6px;
+      width: 12px;
+      height: 12px;
       cursor: pointer;
     }
+
+    .copMarker{
+      background-color: lightblue;
+      border: 2px solid white;
+      border-radius: 8px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .spyMarker{
+      background-color: darkgray;
+      border: 2px solid black;
+      border-radius: 10px;
+      width: 20px;
+      height: 20px;
+    }
+    /* // let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png'; */
     
   </style>
 </head>
@@ -202,6 +218,8 @@ function sleep(milliseconds) {
   let currPMrkr = null;
   let choicePopups = [];
 
+  let copMrkrs = [];
+  let spyMrkrs = [];
 
 
       
@@ -233,6 +251,10 @@ function sleep(milliseconds) {
     currChoices = [];
     choicePopups.forEach(m => m.remove());
     choicePopups = [];
+    copMrkrs.forEach(m => m.remove());
+    copMrkrs = [];
+    spyMrkrs.forEach(m => m.remove());
+    spyMrkrs = [];
   }
 
 
@@ -266,7 +288,34 @@ function sleep(milliseconds) {
 
 
     let isSpy = (players[currPIdx].type === 'spy');
-    // let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png';
+
+    // show all cops
+    let copPlayers = players.filter(p => p.type === 'cop');
+    for(let i=0; i<copPlayers.length; i++) {
+      let p = copPlayers[i];
+      let copMkEl = document.createElement('div');
+      copMkEl.className = 'copMarker';
+      let copMrkr = new mapboxgl.Marker(copMkEl)
+                              .setLngLat(p.location)
+                              .addTo(map);
+      copMrkrs.push(copMrkr);
+    }
+
+    // if spy or 15th turn show spy
+    if (isSpy || (turnIdx % 15 === 0)) {
+      
+      let spyPlayers = players.filter(p => p.type === 'spy');
+      for(let i=0; i<spyPlayers.length; i++) {
+        let p = spyPlayers[i];
+        let spyMkEl = document.createElement('div');
+        spyMkEl.className = 'spyMarker';
+        let spyMrkr = new mapboxgl.Marker(spyMkEl)
+                                .setLngLat(p.location)
+                                .addTo(map);
+        spyMrkrs.push(spyMrkr);
+      }
+
+    }
 
 
     // get list of departures available to current player
@@ -309,16 +358,6 @@ function sleep(milliseconds) {
       
     }
 
-
-    // if spy
-      // show name and cash
-      // show all cops
-      // show spy
-
-    // if cop
-      // show name and cash
-      // show all cops
-      // show spy if 15th turn
     
 
     // check if caught
