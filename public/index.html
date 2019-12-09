@@ -223,8 +223,10 @@ function sleep(milliseconds) {
 
 
       
-  async function jumpHere(pos) {
+  async function jumpHere(pos, price) {
+    if (players[currPIdx].cash - price < 0) return;
     players[currPIdx].location = pos;
+    players[currPIdx].cash -= price;
     await moveCounters();
     await render();
   }
@@ -334,6 +336,7 @@ function sleep(milliseconds) {
       let dstStnData = (await $.get(`/stn/stations?name=${dstName}`))[0];
       
       let loc = dstStnData.evaNumbers[0].geographicCoordinates;
+      let price = dstStnData.priceCategory * 100;
 
       let chMarkerEl = document.createElement('div');
       chMarkerEl.className = 'choiceMarkers';
@@ -343,10 +346,10 @@ function sleep(milliseconds) {
 
       let choicePopupHtml = `<h4>${dstName}</h4>
                         <br />
-                        <p>Price: ${dstStnData.priceCategory * 100}</p>
+                        <p>Price: ${price}</p>
                         <br />
                         <button class="btn btn-primary"
-                                onclick="jumpHere([${loc.coordinates[0]}, ${loc.coordinates[1]}])">Move Here</button>`;
+                                onclick="jumpHere([${loc.coordinates[0]}, ${loc.coordinates[1]}], ${price})">Move Here</button>`;
       let choicePopup = new mapboxgl.Popup({ offset: 25 })
                         .setHTML(choicePopupHtml);
       choicePopups.push(choicePopup);
