@@ -5,20 +5,18 @@
   <title>Berlin Spies</title>
   <meta name=viewport content=initial-scale=1,maximum-scale=1,user-scalable=no />
 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js"></script>
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
   <style>
+
     body {
       margin:0;
       padding:0;
-      font-family: sans-serif;
-      font-size: 14px;
     }
 
     #map { position:absolute; width:100%; height:700px; }
-    #go { position:absolute; top:20px; right:20px; width:300px; background-color: white; height: 20px; text-align: center; }
 
     .currPMarker {
       background-color: red;
@@ -37,68 +35,46 @@
       height: 18px;
       cursor: pointer;
     }
-
-
-    #panel {
-      background: white;
-      width: 400px;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      position: absolute;
-      right: 16px;
-      top: 16px;
-      box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.1);
-      color: rgba(0, 0, 0, 0.5);
-    }
-    h4 {
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      margin: 0;
-      padding: 16px;
-    }
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 16px;
-    }
-    ul span {
-      width: 10px;
-      height: 10px;
-      display: inline-block;
-      margin-right: 8px;
-      border-radius: 50%;
-    }
-    dd {
-      margin-left: 0;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
+    
   </style>
 </head>
 <body>
 
 
 <div class="container">
+  <hr />
   <div class="row">
+
     <div class="col">
-      <br/>
-      <div class="jumbotron" style="background-color: white;">
-        <span>Time:</span>
-        <span id="currTime"></span>
-        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
-        <span>Curr Player:</span>
-        <span id="currPName"></span>
-        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
-        <span>Cash:</span>
-        <span id="currPCash"></span>
-        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
-        <span>Result:</span>
-        <span id="result"></span>
-        <br/>
-        <a href="#!" id="skipBtn" class="btn float-right">Skip</a>
-      </div>
+      <table class="table">
+        <tr>
+          <td><span>Time:</span></td>
+          <td><span id="currTime"></span></td>
+        </tr>
+        <tr>
+          <td><span>Curr Player:</span></td>
+          <td><span id="currPName"></span></td>
+        </tr>
+        <tr>
+          <td><span>Cash:</span></td>
+          <td><span id="currPCash"></span></td>
+        </tr>
+      </table>
     </div>
+
+    <div class="col">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-subtitle text-muted">Message:</h6>
+          <p id="result"></p>
+        </div>
+      </div>
+      <button id="skipBtn" class="btn btn-secondary">Skip</button>
+    </div>
+    
   </div>
 </div>
+
 <div class="row">
   <div class="col">
     <div id="map"></div>
