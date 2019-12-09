@@ -19,16 +19,16 @@
     #map { position:absolute; width:100%; height:700px; }
 
     .currPMarker {
-      background-color: red;
-      border: 2px solid black;
-      border-radius: 12px;
-      width: 24px;
-      height: 24px;
+      /* background-color: red; */
+      border: 2px dashed black;
+      border-radius: 15px;
+      width: 30px;
+      height: 30px;
     }
 
     .choiceMarkers {
-      background-color: yellow;
-      border: 2px solid black;
+      background-color: #E8BA67;
+      border: 2px solid white;
       border-radius: 9px;
       width: 18px;
       height: 18px;
@@ -37,8 +37,8 @@
 
     .copMarker{
       /* background-image: url("/icons/noun_Scared Police_1258357.png"); */
-      background-color: lightblue;
-      border: 2px solid darkblue;
+      background-color: #AB9A52;
+      border: 2px solid #686B30;
       border-radius: 8px;
       width: 16px;
       height: 16px;
@@ -46,11 +46,11 @@
 
     .spyMarker{
       /* background-image: url("/icons/noun_Ninja_23386.png"); */
-      background-color: darkgray;
-      border: 2px solid darkred;
-      border-radius: 10px;
-      width: 20px;
-      height: 20px;
+      background-color: #D68F4F;
+      border: 2px solid #BA512E;
+      border-radius: 8px;
+      width: 16px;
+      height: 16px;
     }
     /* // let imgURL = isSpy ? '/icons/noun_Ninja_23386.png' : '/icons/noun_Scared Police_1258357.png'; */
     
@@ -81,13 +81,26 @@
     </div>
 
     <div class="col">
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-subtitle text-muted">Message:</h6>
-          <p id="result"></p>
-        </div>
-      </div>
+      <h6 class="text-muted">Message:</h6>
+      <p id="message"></p>
+    </div>
+
+    <div class="col">
+      Turn: <span id="turnIdx"></span>
+      <!-- &nbsp;&nbsp;|&nbsp;&nbsp; -->
+      <br />
       <button id="skipBtn" class="btn btn-secondary">Skip</button>
+      <br />
+      <span id="noBlinds"></span>
+      <br />
+      <div style="display: inline-block;" class="currPMarker"></div> Current Player
+      <br />
+      <div style="display: inline-block;" class="choiceMarkers"></div> Destination Available
+      <br />
+      <div style="display: inline-block;" class="copMarker"></div> Cop
+      <br />
+      <div style="display: inline-block;" class="spyMarker"></div> Spy
+      <br />
     </div>
     
   </div>
@@ -210,11 +223,16 @@ function sleep(milliseconds) {
                   new Player("Allied Agent",  [7.537458, 51.518768], 'cop', 1000),
                   new Player("Axis Agent",  [7.007252,51.48437], 'cop', 1000)
                 ];
+
+  
+  let winner = null;
   
                 
   let currPIdx = 0;
   let currTime = new Date(1942, 11, 9, 0, 0, 0, 0)
   let turnIdx = 0;
+  let lastTurn = 7;
+  let noBlindGap = 17;
   
   let currChoices = [];
   let currPMrkr = null;
@@ -225,8 +243,12 @@ function sleep(milliseconds) {
 
 
       
-  async function jumpHere(pos, price) {
-    if (players[currPIdx].cash - price < 0) return;
+  async function moveHere(pos, price) {
+    if (players[currPIdx].cash - price < 0) {
+      players[currPIdx].cash = 0;
+      $("#message").text(`Not enough cash. You are out, press skip.`);
+      return;
+    }
     players[currPIdx].location = pos;
     players[currPIdx].cash -= price;
     await moveCounters();
@@ -241,6 +263,23 @@ function sleep(milliseconds) {
 
 
   function moveCounters() {
+
+    // check if caught
+    if((getDistance(players[0].location, players[1].location) < 0.02)
+    || (getDistance(players[0].location, players[2].location) < 0.02)) {
+      winner = players[currPIdx];
+    }
+
+    // check out of turns
+    if (turnIdx >= lastTurn-1) {
+      winner = players.filter(p => p.type === 'spy')[0];
+    }
+
+    if (winner !== null) {
+      $("#message").text(`Game Over!! ${winner.name} wins`);
+      return;
+    }
+
     currTime = currTime.addDays(1);
     currTime = currTime.addHours(1);
     currPIdx++;
@@ -264,6 +303,11 @@ function sleep(milliseconds) {
 
   async function step() {
 
+    // if (winner !== null) {
+    //   $("#message").text(`Game Over!! ${winner.name} wins`);
+    //   return;
+    // }
+
     // clear board
     await clear();
     
@@ -279,6 +323,8 @@ function sleep(milliseconds) {
     $("#currPName").text(players[currPIdx].name);
     $("#currPCash").text(players[currPIdx].cash);
     $("#currTime").text(`${currTime.toDateString()}`);
+    $("#turnIdx").text(`${turnIdx + 1}/${lastTurn}`);
+    $("#noBlinds").text(`No blinds in: ${noBlindGap - (turnIdx % noBlindGap)} turns`);
 
 
     let playerPopup = `<h4>${players[currPIdx].name}</h4>
@@ -305,8 +351,8 @@ function sleep(milliseconds) {
       copMrkrs.push(copMrkr);
     }
 
-    // if spy or 15th turn show spy
-    if (isSpy || (turnIdx % 15 === 0)) {
+    // if spy or noBlindGapth turn show spy
+    if (isSpy || (turnIdx % noBlindGap === 0)) {
       
       let spyPlayers = players.filter(p => p.type === 'spy');
       for(let i=0; i<spyPlayers.length; i++) {
@@ -350,8 +396,8 @@ function sleep(milliseconds) {
                         <br />
                         <p>Price: ${price}</p>
                         <br />
-                        <button class="btn btn-primary"
-                                onclick="jumpHere([${loc.coordinates[0]}, ${loc.coordinates[1]}], ${price})">Move Here</button>`;
+                        <button class="btn btn-secondary"
+                                onclick="moveHere([${loc.coordinates[0]}, ${loc.coordinates[1]}], ${price})">Move Here</button>`;
       let choicePopup = new mapboxgl.Popup({ offset: 25 })
                         .setHTML(choicePopupHtml);
       choicePopups.push(choicePopup);
@@ -363,14 +409,6 @@ function sleep(milliseconds) {
       
     }
 
-    
-
-    // check if caught
-    // update with results
-    if((getDistance(players[0].location, players[1].location) < 0.02)
-    || (getDistance(players[0].location, players[2].location) < 0.02)) {
-      $("#result").text('Game Over!!');
-    }
 
   }
 
