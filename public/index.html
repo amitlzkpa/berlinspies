@@ -36,16 +36,18 @@
     }
 
     .copMarker{
+      /* background-image: url("/icons/noun_Scared Police_1258357.png"); */
       background-color: lightblue;
-      border: 2px solid white;
+      border: 2px solid darkblue;
       border-radius: 8px;
       width: 16px;
       height: 16px;
     }
 
     .spyMarker{
+      /* background-image: url("/icons/noun_Ninja_23386.png"); */
       background-color: darkgray;
-      border: 2px solid black;
+      border: 2px solid darkred;
       border-radius: 10px;
       width: 20px;
       height: 20px;
@@ -228,13 +230,13 @@ function sleep(milliseconds) {
     players[currPIdx].location = pos;
     players[currPIdx].cash -= price;
     await moveCounters();
-    await render();
+    await step();
   }
 
 
   $("#skipBtn").on('click', async function(event) {
     await moveCounters();
-    await render();
+    await step();
   })
 
 
@@ -260,13 +262,13 @@ function sleep(milliseconds) {
   }
 
 
-  async function render() {
+  async function step() {
 
     // clear board
     await clear();
     
-    console.log(turnIdx);
-    console.log(players[currPIdx]);
+    // console.log(turnIdx);
+    // console.log(players[currPIdx]);
 
     // update board with current players details
     let currPMkEl = document.createElement('div');
@@ -373,7 +375,7 @@ function sleep(milliseconds) {
   }
 
 
-  render();
+  step();
 
 
 </script>
