@@ -59,58 +59,74 @@
 <body>
 
 
-<div class="container">
-  <hr />
-  <div class="row">
+  <nav class="navbar navbar-light bg-light">
+    
+    <a href="/">
+      <div>
+        <img src="favicon.ico" style="height: 28px; margin-bottom: 4px;" />
+        <span class="navbar-brand mb-0 h1">BerlinSpies</span>
+      </div>
+    </a>
 
-    <div class="col">
-      <table class="table">
-        <tr>
-          <td><span>Time:</span></td>
-          <td><span id="currTime"></span></td>
-        </tr>
-        <tr>
-          <td><span>Curr Player:</span></td>
-          <td><span id="currPName"></span></td>
-        </tr>
-        <tr>
-          <td><span>Cash:</span></td>
-          <td><span id="currPCash"></span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="col">
-      <h6 class="text-muted">Message:</h6>
-      <p id="message"></p>
-    </div>
-
-    <div class="col">
-      Turn: <span id="turnIdx"></span>
-      <!-- &nbsp;&nbsp;|&nbsp;&nbsp; -->
-      <br />
-      <button id="skipBtn" class="btn btn-secondary">Skip</button>
-      <br />
-      <span id="noBlinds"></span>
-      <br />
-      <div style="display: inline-block;" class="currPMarker"></div> Current Player
-      <br />
-      <div style="display: inline-block;" class="choiceMarkers"></div> Destination Available
-      <br />
-      <div style="display: inline-block;" class="copMarker"></div> Cop
-      <br />
-      <div style="display: inline-block;" class="spyMarker"></div> Spy
-      <br />
+    <div>
+      <button class="btn btn-primary">Login</button>
     </div>
     
-  </div>
-</div>
+  </nav>
 
-<div class="row">
-  <div class="col">
-    <div id="map"></div>
+
+  <div class="container">
+    <hr />
+    <div class="row">
+
+      <div class="col">
+        <table class="table">
+          <tr>
+            <td><span>Time:</span></td>
+            <td><span id="currTime"></span></td>
+          </tr>
+          <tr>
+            <td><span>Curr Player:</span></td>
+            <td><span id="currPName"></span></td>
+          </tr>
+          <tr>
+            <td><span>Cash:</span></td>
+            <td><span id="currPCash"></span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="col">
+        <h6 class="text-muted">Message:</h6>
+        <p id="message"></p>
+      </div>
+
+      <div class="col">
+        Turn: <span id="turnIdx"></span>
+        <!-- &nbsp;&nbsp;|&nbsp;&nbsp; -->
+        <br />
+        <button id="skipBtn" class="btn btn-secondary">Skip</button>
+        <br />
+        <span id="noBlinds"></span>
+        <br />
+        <div style="display: inline-block;" class="currPMarker"></div> Current Player
+        <br />
+        <div style="display: inline-block;" class="choiceMarkers"></div> Destination Available
+        <br />
+        <div style="display: inline-block;" class="copMarker"></div> Cop
+        <br />
+        <div style="display: inline-block;" class="spyMarker"></div> Spy
+        <br />
+      </div>
+      
+    </div>
   </div>
-</div>
+
+  <div class="row">
+    <div class="col">
+      <div id="map"></div>
+    </div>
+  </div>
 
 
 
