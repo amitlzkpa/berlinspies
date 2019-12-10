@@ -153,42 +153,56 @@
 
 
 
-Date.prototype.addDays = function(days) {
+  Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
     return date;
-}
+  }
 
-Date.prototype.addHours = function(hours) {
+  Date.prototype.addHours = function(hours) {
     var date = new Date(this.valueOf());
     date.setHours(date.getHours() + hours);
     return date;
-}
+  }
 
 
 
-function getDistance(ptA, ptB) {
-  return Math.sqrt((Math.pow(ptB[0], 2) - Math.pow(ptA[0], 2)) + (Math.pow(ptB[1], 2) - Math.pow(ptA[1], 2)));
-}
+  function getDistance(ptA, ptB) {
+    return Math.sqrt((Math.pow(ptB[0], 2) - Math.pow(ptA[0], 2)) + (Math.pow(ptB[1], 2) - Math.pow(ptA[1], 2)));
+  }
 
-function shuffle(a) {
-    var j, x, i;
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = a[i];
-        a[i] = a[j];
-        a[j] = x;
-    }
-    return a;
-}
+  function shuffle(a) {
+      var j, x, i;
+      for (i = a.length - 1; i > 0; i--) {
+          j = Math.floor(Math.random() * (i + 1));
+          x = a[i];
+          a[i] = a[j];
+          a[j] = x;
+      }
+      return a;
+  }
 
-function pad(n){return n<10 ? '0'+n : n}
+  function pad(n){return n<10 ? '0'+n : n}
 
-function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
+  function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+  }
 
 
+
+  /**
+ 
+   _     _            _        _             _    
+  | |__ | | ___   ___| | _____| |_ __ _  ___| | __
+  | '_ \| |/ _ \ / __| |/ / __| __/ _` |/ __| |/ /
+  | |_) | | (_) | (__|   <\__ \ || (_| | (__|   < 
+  |_.__/|_|\___/ \___|_|\_\___/\__\__,_|\___|_|\_\
+                                                  
+ 
+  **/
+
+
+  var session;
 
   document.getElementById('signInBtn').addEventListener('click', function() {
     blockstack.redirectToSignIn();
@@ -203,6 +217,7 @@ function sleep(milliseconds) {
   function showProfile(profile) {
     var person = new blockstack.Person(profile);
     document.getElementById('currUserName').innerHTML = person.name();
+    session = new blockstack.UserSession(new blockstack.AppConfig(['store_write', 'publish_data']));
   }
 
   function updateUserProfile() {
@@ -219,6 +234,8 @@ function sleep(milliseconds) {
   }
 
   updateUserProfile();
+
+
 
  /**
                      
@@ -301,6 +318,11 @@ function sleep(milliseconds) {
     }
     players[currPIdx].location = pos;
     players[currPIdx].cash -= price;
+    var j = JSON.stringify(players[currPIdx]);
+    console.log(j);
+    var options = { encrypt: false };
+    var q = await session.putFile('test-file.json', j, options);
+    console.log(q);
     await moveCounters();
     await step();
   }
