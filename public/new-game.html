@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title>BerlinSpies</title>
+  <meta name=viewport content=initial-scale=1,maximum-scale=1,user-scalable=no />
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
+  <script src="/scripts/blockstack/dist/blockstack.js"></script>
+</head>
+<body>
+
+
+  <nav class="navbar navbar-light bg-light">
+    
+    <a href="/">
+      <div>
+        <img src="favicon.ico" style="height: 28px; margin-bottom: 4px;" />
+        <span class="navbar-brand mb-0 h1">BerlinSpies</span>
+      </div>
+    </a>
+
+    <div>
+      <span id="currUserName"></span>
+      &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+      <button class="btn btn-primary" id="signInBtn">Login</button>
+      <button class="btn" id="signOutBtn">Logout</button>
+    </div>
+
+  </nav>
+
+
+  <div class="container">
+    <hr />
+    <div class="row">
+
+      <div class="col">
+
+        <form>
+
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" aria-describedby="name" placeholder="Enter name">
+          </div>
+
+          <div class="form-group">
+            <label for="playerCount">Number of players</label>
+            <select class="form-control" id="playerCount">
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="game_end">End</label>
+            <input type="number" min="2" max="300" class="form-control" id="game_end" aria-describedby="game_end" placeholder="Number of turns">
+            <small class="form-text text-muted">If the spy is not caught till this many turns, the spy wins!</small>
+          </div>
+
+          <div class="form-group">
+            <label for="game_reveal">Reveal</label>
+            <input type="number" min="2" max="30" class="form-control" id="game_reveal" aria-describedby="game_reveal" placeholder="Number of turns">
+            <small class="form-text text-muted">The full board will be opened for everyone after this many turns.</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Submit</button>
+
+        </form>
+        
+        <br />
+        <hr />
+        <br />
+
+        <div>
+          <div class="form-check form-check mt-2">
+            <input class="form-check-input" type="radio" name="players" id="players" value="player1" style="margin-top: 2px;">
+            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
+          </div>
+          <div class="form-check form-check mt-2">
+            <input class="form-check-input" type="radio" name="players" id="players" value="player2" style="margin-top: 2px;">
+            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
+          </div>
+          <div class="form-check form-check mt-2">
+            <input class="form-check-input" type="radio" name="players" id="players" value="player3" style="margin-top: 2px;">
+            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
+          </div>
+        </div>
+
+
+
+
+      
+    </div>
+  </div>
+
+
+
+
+<script>
+
+
+
+  /**
+ 
+   _     _            _        _             _    
+  | |__ | | ___   ___| | _____| |_ __ _  ___| | __
+  | '_ \| |/ _ \ / __| |/ / __| __/ _` |/ __| |/ /
+  | |_) | | (_) | (__|   <\__ \ || (_| | (__|   < 
+  |_.__/|_|\___/ \___|_|\_\___/\__\__,_|\___|_|\_\
+                                                  
+ 
+  **/
+
+
+  var session;
+
+  document.getElementById('signInBtn').addEventListener('click', function() {
+    blockstack.redirectToSignIn();
+    updateUserProfile();
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', function() {
+    blockstack.signUserOut(window.location.origin);
+    updateUserProfile();
+  })
+
+  function showProfile(profile) {
+    var person = new blockstack.Person(profile);
+    document.getElementById('currUserName').innerHTML = person.name();
+    session = new blockstack.UserSession(new blockstack.AppConfig(['store_write', 'publish_data']));
+  }
+
+  function updateUserProfile() {
+    if (blockstack.isUserSignedIn()) {
+      const userData = blockstack.loadUserData();
+      console.log(userData);
+      showProfile(userData.profile);
+    } else if (blockstack.isSignInPending()) {
+      blockstack.handlePendingSignIn()
+      .then(userData => {
+        showProfile(userData.profile);
+      })
+    }
+  }
+
+  updateUserProfile();
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+</body>
+</html>
