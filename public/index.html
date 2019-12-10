@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset=utf-8 />
-  <title>Berlin Spies</title>
+  <title>BerlinSpies</title>
   <meta name=viewport content=initial-scale=1,maximum-scale=1,user-scalable=no />
 
   <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -70,7 +70,10 @@
     </a>
 
     <div>
-      <button class="btn btn-primary">Login</button>
+      <span id="currUserName"></span>
+      &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+      <button class="btn btn-primary" id="signInBtn">Login</button>
+      <button class="btn" id="signOutBtn">Logout</button>
     </div>
 
   </nav>
@@ -186,6 +189,36 @@ function sleep(milliseconds) {
 }
 
 
+
+  document.getElementById('signInBtn').addEventListener('click', function() {
+    blockstack.redirectToSignIn();
+    updateUserProfile();
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', function() {
+    blockstack.signUserOut(window.location.origin);
+    updateUserProfile();
+  })
+
+  function showProfile(profile) {
+    var person = new blockstack.Person(profile);
+    document.getElementById('currUserName').innerHTML = person.name();
+  }
+
+  function updateUserProfile() {
+    if (blockstack.isUserSignedIn()) {
+      const userData = blockstack.loadUserData();
+      console.log(userData);
+      showProfile(userData.profile);
+    } else if (blockstack.isSignInPending()) {
+      blockstack.handlePendingSignIn()
+      .then(userData => {
+        showProfile(userData.profile);
+      })
+    }
+  }
+
+  updateUserProfile();
 
  /**
                      
