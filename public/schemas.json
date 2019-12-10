@@ -1,0 +1,27 @@
+{
+  
+  "Game": {
+    "name": "test-game",
+    "winner": "",
+    "currPIdx": 0,
+    "currTime": "1942-12-09T04:00:00.000Z",
+    "turnIdx": 0,
+    "lastTurn": 100,
+    "noBlindGap": 17,
+    "players":  [];
+  },
+
+  "Player": {
+    "name": "player1",
+    "location": [13.492286, 52.636162],
+    "type": "cop",
+    "cash": 1000,
+    "data": {}
+  }
+
+}
+
+
+
+
+
