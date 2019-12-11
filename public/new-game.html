@@ -9,11 +9,12 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js"></script>
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
+  <script src="scripts/handlebars/dist/handlebars.min.js"></script>
   <script src="/scripts/blockstack/dist/blockstack.js"></script>
 </head>
 <body>
 
-
+  <!-- Nav -->
   <nav class="navbar navbar-light bg-light">
     
     <a href="/">
@@ -33,66 +34,74 @@
   </nav>
 
 
+  <!-- Form -->
   <div class="container">
     <hr />
     <div class="row">
 
       <div class="col">
 
-        <form>
+        <div>
 
           <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" id="name" aria-describedby="name" placeholder="Enter name">
+            <label for="newGameName">Name</label>
+            <input type="text" class="form-control" id="newGameName" aria-describedby="name" placeholder="Enter name">
           </div>
 
           <div class="form-group">
-            <label for="playerCount">Number of players</label>
-            <select class="form-control" id="playerCount">
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-              <option>6</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="game_end">End</label>
-            <input type="number" min="2" max="300" class="form-control" id="game_end" aria-describedby="game_end" placeholder="Number of turns">
+            <label for="gameEndTurns">End</label>
+            <input type="number" min="2" max="300" class="form-control" id="gameEndTurns" aria-describedby="gameEndTurns" placeholder="100">
             <small class="form-text text-muted">If the spy is not caught till this many turns, the spy wins!</small>
           </div>
 
           <div class="form-group">
-            <label for="game_reveal">Reveal</label>
-            <input type="number" min="2" max="30" class="form-control" id="game_reveal" aria-describedby="game_reveal" placeholder="Number of turns">
+            <label for="gameRevealTurns">Reveal</label>
+            <input type="number" min="2" max="30" class="form-control" id="gameRevealTurns" aria-describedby="gameRevealTurns" placeholder="17">
             <small class="form-text text-muted">The full board will be opened for everyone after this many turns.</small>
           </div>
 
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <hr />
+          
 
-        </form>
-        
-        <br />
-        <hr />
-        <br />
+          <div class="form-group" style="min-height: 200px;">
+              <label for="gameRevealTurns">Players</label>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Blockstack ID</th>
+                    <th scope="col">Spy</th>
+                  </tr>
+                </thead>
+                <tbody id="playerInfoContainer">
+                </tbody>
+              </table>
+          </div>
 
-        <div>
-          <div class="form-check form-check mt-2">
-            <input class="form-check-input" type="radio" name="players" id="players" value="player1" style="margin-top: 2px;">
-            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
-          </div>
-          <div class="form-check form-check mt-2">
-            <input class="form-check-input" type="radio" name="players" id="players" value="player2" style="margin-top: 2px;">
-            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
-          </div>
-          <div class="form-check form-check mt-2">
-            <input class="form-check-input" type="radio" name="players" id="players" value="player3" style="margin-top: 2px;">
-            <input type="text" class="form-control" aria-describedby="name" placeholder="Enter name">
-          </div>
+          <button class="btn btn-secondary" id="addPlayerBtn">Add Player</button>
+          <button class="btn btn-primary" id="submitBtn">Submit</button>
+
         </div>
+        
 
 
+        <script id="playerDetailsTemplate" type="text/x-handlebars-template">
+          <tr>
+            <th scope="row">
+              {{ nxtIdx }}
+            </th>
+            <td>
+              <input class="form-control" type="text" name="name" id="player-name_" + {{ nxtIdx }} />
+            </td>
+            <td>
+              <input class="form-control" type="text" name="blockstack" id="blockstack-id_" + {{ nxtIdx }} />
+            </td>
+            <td class="text-center">
+              <input class="form-check-input mt-3" type="radio" name="players" class="mt-2" id="isSpy_" + {{ nxtIdx }}>
+            </td>
+          </tr>
+        </script>
 
 
       
@@ -105,51 +114,70 @@
 <script>
 
 
+  class Game {
+    name = "";
+    winner = "";
+    currPIdx = 0;
+    currTime = "1942-12-09T04:00:00.000Z";
+    turnIdx = 0;
+    lastTurn = 100;
+    noBlindGap = 17;
+    players =  [];
+  };
 
-  /**
- 
-   _     _            _        _             _    
-  | |__ | | ___   ___| | _____| |_ __ _  ___| | __
-  | '_ \| |/ _ \ / __| |/ / __| __/ _` |/ __| |/ /
-  | |_) | | (_) | (__|   <\__ \ || (_| | (__|   < 
-  |_.__/|_|\___/ \___|_|\_\___/\__\__,_|\___|_|\_\
-                                                  
- 
-  **/
 
+  
 
-  var session;
+window.addEventListener('load', async function() { 
 
-  document.getElementById('signInBtn').addEventListener('click', function() {
-    blockstack.redirectToSignIn();
-    updateUserProfile();
+  
+  $("#submitBtn").on('click', async function() {
+
+    var newGameName = $("#newGameName").val()
+    var gameEndTurns = $("#gameEndTurns").val();
+    var gameRevealTurns = $("#gameRevealTurns").val();
+
+    var players = [];
+
+    var playerCount = $("#playerInfoContainer tr").length;
+    console.log((`#player-name_${1}`));
+    for(let i=1; i<playerCount+1; i++) {
+      var playerObj = {
+                        "name": $(`#player-name_${i}`).val(),
+                        "location": [13.492286, 52.636162],
+                        "type": ($(`#isSpy_${i}`).val()) ? "spy" : "cop",
+                        "cash": ($(`#isSpy_${i}`).val()) ? 100000 : 1000,
+                        "data": {
+                          "blockstack_id": $(`#blockstack-id_${i}`).val()
+                        }
+                      }
+      console.log(playerObj);
+    }
+    
+    var newGame = new Game();
+    newGame.name = newGameName;
+    newGame.lastTurn = gameEndTurns;
+    newGame.noBlindGap = gameRevealTurns;
+    newGame.players = players;
+
+    // console.log(newGame);
+
   });
 
-  document.getElementById('signOutBtn').addEventListener('click', function() {
-    blockstack.signUserOut(window.location.origin);
-    updateUserProfile();
-  })
 
-  function showProfile(profile) {
-    var person = new blockstack.Person(profile);
-    document.getElementById('currUserName').innerHTML = person.name();
-    session = new blockstack.UserSession(new blockstack.AppConfig(['store_write', 'publish_data']));
-  }
+  $("#addPlayerBtn").on('click', async function() {
 
-  function updateUserProfile() {
-    if (blockstack.isUserSignedIn()) {
-      const userData = blockstack.loadUserData();
-      console.log(userData);
-      showProfile(userData.profile);
-    } else if (blockstack.isSignInPending()) {
-      blockstack.handlePendingSignIn()
-      .then(userData => {
-        showProfile(userData.profile);
-      })
-    }
-  }
+    var playerInfoContainer = $("#playerInfoContainer");
+    var playerDetailsTemplate = Handlebars.compile($('#playerDetailsTemplate').html());
+    var nxtIdx = $("#playerInfoContainer tr").length + 1;
+    var playerDetailHtml = playerDetailsTemplate({nxtIdx: nxtIdx});
+    playerInfoContainer.append(playerDetailHtml);
 
-  updateUserProfile();
+  });
+  
+  
+});
+
 
 
 
