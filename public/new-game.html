@@ -92,13 +92,13 @@
               {{ nxtIdx }}
             </th>
             <td>
-              <input class="form-control" type="text" name="name" id="player-name_" + {{ nxtIdx }} />
+              <input class="form-control" type="text" name="name" id="player-name_{{ nxtIdx }}" />
             </td>
             <td>
-              <input class="form-control" type="text" name="blockstack" id="blockstack-id_" + {{ nxtIdx }} />
+              <input class="form-control" type="text" name="blockstack" id="blockstack-id_{{ nxtIdx }}" />
             </td>
             <td class="text-center">
-              <input class="form-check-input mt-3" type="radio" name="players" class="mt-2" id="isSpy_" + {{ nxtIdx }}>
+              <input class="form-check-input mt-3" type="radio" name="players" class="mt-2" id="isSpy_{{ nxtIdx }}">
             </td>
           </tr>
         </script>
@@ -140,18 +140,18 @@ window.addEventListener('load', async function() {
     var players = [];
 
     var playerCount = $("#playerInfoContainer tr").length;
-    console.log((`#player-name_${1}`));
     for(let i=1; i<playerCount+1; i++) {
+      let isSpy = $(`#isSpy_${i}`).is(":checked");
       var playerObj = {
                         "name": $(`#player-name_${i}`).val(),
-                        "location": [13.492286, 52.636162],
-                        "type": ($(`#isSpy_${i}`).val()) ? "spy" : "cop",
-                        "cash": ($(`#isSpy_${i}`).val()) ? 100000 : 1000,
+                        "location": [],
+                        "type": isSpy ? "spy" : "cop",
+                        "cash": isSpy ? 100000 : 1000,
                         "data": {
-                          "blockstack_id": $(`#blockstack-id_${i}`).val()
+                          "blockstack-id": $(`#blockstack-id_${i}`).val()
                         }
                       }
-      console.log(playerObj);
+      players.push(playerObj);
     }
     
     var newGame = new Game();
@@ -159,8 +159,6 @@ window.addEventListener('load', async function() {
     newGame.lastTurn = gameEndTurns;
     newGame.noBlindGap = gameRevealTurns;
     newGame.players = players;
-
-    // console.log(newGame);
 
   });
 
