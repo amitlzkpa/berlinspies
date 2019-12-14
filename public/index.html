@@ -57,14 +57,15 @@
     <hr />
     <div class="row">
   
-      <div class="col">
+      <div class="col-md-12 col-lg-4">
+        <h6 class="text-muted">Current State:</h6>
         <table class="table">
           <tr>
             <td><span>Time:</span></td>
             <td><span id="currTime"></span></td>
           </tr>
           <tr>
-            <td><span>Curr Player:</span></td>
+            <td><span>Current Player:</span></td>
             <td><span id="currPName"></span></td>
           </tr>
           <tr>
@@ -74,19 +75,12 @@
         </table>
       </div>
   
-      <div class="col">
+      <div class="col-md-12 col-lg-4">
         <h6 class="text-muted">Message:</h6>
-        <p id="message"></p>
-      </div>
-  
-      <div class="col">
-        Turn: <span id="turnIdx"></span>
-        <!-- &nbsp;&nbsp;|&nbsp;&nbsp; -->
-        <br />
-        <button id="skipBtn" class="btn btn-secondary">Skip</button>
-        <br />
-        <span id="noBlinds"></span>
-        <br />
+        <div style="min-height: 30px;">
+          <p id="message"></p>
+        </div>
+        <h6 class="text-muted">Legend:</h6>
         <div style="display: inline-block;" class="currPMarker"></div> Current Player
         <br />
         <div style="display: inline-block;" class="choiceMarkers"></div> Destination Available
@@ -96,8 +90,18 @@
         <div style="display: inline-block;" class="spyMarker"></div> Spy
         <br />
       </div>
+  
+      <div class="col-md-12 col-lg-4">
+        Turn: <span id="turnIdx"></span>
+        <!-- &nbsp;&nbsp;|&nbsp;&nbsp; -->
+        <br />
+        <button id="skipBtn" class="btn btn-secondary">Skip</button>
+        <br />
+        <span id="noBlinds"></span>
+      </div>
       
     </div>
+    <br />
   </div>
   
 
