@@ -51,6 +51,10 @@
 
       <div class="col">
 
+        <p id="message">
+
+        </p>
+        
         <div>
 
           <div class="form-group">
@@ -141,73 +145,73 @@
 
   
 
-window.addEventListener('load', async function() {
+  window.addEventListener('load', async function() {
 
 
-  // source in navbar.js
-  initNavbar();
+    // source in navbar.js
+    initNavbar();
 
-  
-  $("#submitBtn").on('click', async function() {
+    
+    $("#submitBtn").on('click', async function() {
 
-    var newGameName = $("#newGameName").val()
-    var gameEndTurns = $("#gameEndTurns").val();
-    var gameRevealTurns = $("#gameRevealTurns").val();
+      var newGameName = $("#newGameName").val()
+      var gameEndTurns = $("#gameEndTurns").val();
+      var gameRevealTurns = $("#gameRevealTurns").val();
 
-    var players = [];
+      var players = [];
 
-    var playerCount = $("#playerInfoContainer tr").length;
-    for(let i=1; i<playerCount+1; i++) {
-      let isSpy = $(`#isSpy_${i}`).is(":checked");
-      var playerObj = {
-                        "name": $(`#player-name_${i}`).val(),
-                        "location": [],
-                        "type": isSpy ? "spy" : "cop",
-                        "cash": isSpy ? 100000 : 1000,
-                        "data": {
-                          "blockstack-id": $(`#blockstack-id_${i}`).val()
+      var playerCount = $("#playerInfoContainer tr").length;
+      for(let i=1; i<playerCount+1; i++) {
+        let isSpy = $(`#isSpy_${i}`).is(":checked");
+        var playerObj = {
+                          "name": $(`#player-name_${i}`).val(),
+                          "location": [],
+                          "type": isSpy ? "spy" : "cop",
+                          "cash": isSpy ? 100000 : 1000,
+                          "data": {
+                            "blockstack-id": $(`#blockstack-id_${i}`).val()
+                          }
                         }
-                      }
-      players.push(playerObj);
-    }
+        players.push(playerObj);
+      }
+      
+
+      var array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+
+      var hashids = new Hashids("berlinspies", 8, "abcdefghijklmnopqrstuvwxyz1234567890");
+      var id = hashids.encode(...array).toString();
+      
+      var newGame = new Game();
+      newGame.id = id;
+      newGame.name = newGameName;
+      newGame.lastTurn = gameEndTurns;
+      newGame.noBlindGap = gameRevealTurns;
+      newGame.players = players;
+
+      console.log(newGame);
+
+      var newGameJson = JSON.stringify(newGame);
+      var options = { encrypt: false };
+      var newGameOnCloud = await session.putFile(`${id}.json`, newGameJson, options);
+      
+      console.log(newGameOnCloud);
+
+    });
+
+
+    $("#addPlayerBtn").on('click', async function() {
+
+      var playerInfoContainer = $("#playerInfoContainer");
+      var playerDetailsTemplate = Handlebars.compile($('#playerDetailsTemplate').html());
+      var nxtIdx = $("#playerInfoContainer tr").length + 1;
+      var playerDetailHtml = playerDetailsTemplate({nxtIdx: nxtIdx});
+      playerInfoContainer.append(playerDetailHtml);
+
+    });
     
-
-    var array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-
-    var hashids = new Hashids("berlinspies", 8, "abcdefghijklmnopqrstuvwxyz1234567890");
-    var id = hashids.encode(...array).toString();
     
-    var newGame = new Game();
-    newGame.id = id;
-    newGame.name = newGameName;
-    newGame.lastTurn = gameEndTurns;
-    newGame.noBlindGap = gameRevealTurns;
-    newGame.players = players;
-
-    console.log(newGame);
-
-    var newGameJson = JSON.stringify(newGame);
-    var options = { encrypt: false };
-    var newGameOnCloud = await session.putFile(`${id}.json`, newGameJson, options);
-    
-    console.log(newGameOnCloud);
-
   });
-
-
-  $("#addPlayerBtn").on('click', async function() {
-
-    var playerInfoContainer = $("#playerInfoContainer");
-    var playerDetailsTemplate = Handlebars.compile($('#playerDetailsTemplate').html());
-    var nxtIdx = $("#playerInfoContainer tr").length + 1;
-    var playerDetailHtml = playerDetailsTemplate({nxtIdx: nxtIdx});
-    playerInfoContainer.append(playerDetailHtml);
-
-  });
-  
-  
-});
 
 
 
