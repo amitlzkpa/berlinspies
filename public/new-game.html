@@ -11,27 +11,36 @@
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
   <script src="scripts/handlebars/dist/handlebars.min.js"></script>
   <script src="/scripts/blockstack/dist/blockstack.js"></script>
+  <script src="/js/navbar.js"></script>
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav class="navbar navbar-light bg-light">
-    
-    <a href="/">
+  <script id="navbarTemplate" type="text/x-handlebars-template">
+    <nav class="navbar navbar-light bg-light">
+      
+      <a href="/">
+        <div>
+          <img src="favicon.ico" style="height: 28px; margin-bottom: 4px;" />
+          <span class="navbar-brand mb-0 h1">BerlinSpies</span>
+        </div>
+      </a>
+  
       <div>
-        <img src="favicon.ico" style="height: 28px; margin-bottom: 4px;" />
-        <span class="navbar-brand mb-0 h1">BerlinSpies</span>
+        <span id="currUserName"></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+        {{#if user}}
+        <button class="btn" id="signOutBtn">Logout</button>
+        {{else}}
+        <button class="btn btn-primary" id="signInBtn">Login</button>
+        {{/if}}
       </div>
-    </a>
+  
+    </nav>
+  </script>
 
-    <div>
-      <span id="currUserName"></span>
-      &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
-      <button class="btn btn-primary" id="signInBtn">Login</button>
-      <button class="btn" id="signOutBtn">Logout</button>
-    </div>
 
-  </nav>
+  <!-- Nav -->
+  <div id="navbarContainer"></div>
 
 
   <!-- Form -->
@@ -64,19 +73,19 @@
           
 
           <div class="form-group" style="min-height: 200px;">
-              <label for="gameRevealTurns">Players</label>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Blockstack ID</th>
-                    <th scope="col">Spy</th>
-                  </tr>
-                </thead>
-                <tbody id="playerInfoContainer">
-                </tbody>
-              </table>
+            <label for="gameRevealTurns">Players</label>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Blockstack ID</th>
+                  <th scope="col">Spy</th>
+                </tr>
+              </thead>
+              <tbody id="playerInfoContainer">
+              </tbody>
+            </table>
           </div>
 
           <button class="btn btn-secondary" id="addPlayerBtn">Add Player</button>
@@ -103,7 +112,7 @@
           </tr>
         </script>
 
-
+      </div>
       
     </div>
   </div>
@@ -126,9 +135,15 @@
   };
 
 
+
+
   
 
-window.addEventListener('load', async function() { 
+window.addEventListener('load', async function() {
+
+
+  // source in navbar.js
+  initNavbar();
 
   
   $("#submitBtn").on('click', async function() {

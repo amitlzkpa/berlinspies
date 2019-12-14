@@ -56,53 +56,6 @@ window.addEventListener('load', async function() {
 
 
   /**
-
-  _     _            _        _             _    
-  | |__ | | ___   ___| | _____| |_ __ _  ___| | __
-  | '_ \| |/ _ \ / __| |/ / __| __/ _` |/ __| |/ /
-  | |_) | | (_) | (__|   <\__ \ || (_| | (__|   < 
-  |_.__/|_|\___/ \___|_|\_\___/\__\__,_|\___|_|\_\
-                                                  
-
-  **/
-
-
-  var session;
-
-  document.getElementById('signInBtn').addEventListener('click', function() {
-    blockstack.redirectToSignIn();
-    updateUserProfile();
-  });
-
-  document.getElementById('signOutBtn').addEventListener('click', function() {
-    blockstack.signUserOut(window.location.origin);
-    updateUserProfile();
-  })
-
-  function showProfile(profile) {
-    var person = new blockstack.Person(profile);
-    document.getElementById('currUserName').innerHTML = person.name();
-    session = new blockstack.UserSession(new blockstack.AppConfig(['store_write', 'publish_data']));
-  }
-
-  function updateUserProfile() {
-    if (blockstack.isUserSignedIn()) {
-      const userData = blockstack.loadUserData();
-      console.log(userData);
-      showProfile(userData.profile);
-    } else if (blockstack.isSignInPending()) {
-      blockstack.handlePendingSignIn()
-      .then(userData => {
-        showProfile(userData.profile);
-      })
-    }
-  }
-
-  updateUserProfile();
-
-
-
-  /**
                      
                     
     __ _ _ __  _ __  
