@@ -174,7 +174,30 @@
                         }
         players.push(playerObj);
       }
+
+      function isValidString(str) {
+        return (str !== null && str !== undefined && str.trim() !== "");
+      }      
       
+      if (!isValidString(newGameName)) {
+        $('#message').html("Inavlid name.");
+        return;
+      }
+      
+      if (gameEndTurns < playerCount+1) {
+        $('#message').html("Inavlid end number of turns.");
+        return;
+      }
+      
+      if (gameRevealTurns < 1) {
+        $('#message').html("Inavlid end number of turns for reveal.");
+        return;
+      }
+      
+      if (playerCount < 2) {
+        $('#message').html("Inavlid end number of players. Need at least 2.");
+        return;
+      }
 
       var array = new Uint32Array(1);
       window.crypto.getRandomValues(array);
