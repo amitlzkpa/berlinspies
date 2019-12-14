@@ -136,11 +136,6 @@ window.addEventListener('load', async function() {
     }
     players[currPIdx].location = pos;
     players[currPIdx].cash -= price;
-    var j = JSON.stringify(players[currPIdx]);
-    console.log(j);
-    var options = { encrypt: false };
-    var q = await session.putFile('test-file.json', j, options);
-    console.log(q);
     await moveCounters();
     await step();
   }

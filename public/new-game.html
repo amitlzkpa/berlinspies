@@ -10,6 +10,7 @@
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js"></script>
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css" rel=stylesheet />
   <script src="scripts/handlebars/dist/handlebars.min.js"></script>
+  <script src="https://cdn.rawgit.com/hashids/hashids.github.io/master/public/js/lib/hashids.min.js"></script>
   <script src="/scripts/blockstack/dist/blockstack.js"></script>
   <script src="/js/navbar.js"></script>
 </head>
@@ -59,13 +60,13 @@
 
           <div class="form-group">
             <label for="gameEndTurns">End</label>
-            <input type="number" min="2" max="300" class="form-control" id="gameEndTurns" aria-describedby="gameEndTurns" placeholder="100">
+            <input type="number" min="2" max="300" class="form-control" id="gameEndTurns" aria-describedby="gameEndTurns" value="100">
             <small class="form-text text-muted">If the spy is not caught till this many turns, the spy wins!</small>
           </div>
 
           <div class="form-group">
             <label for="gameRevealTurns">Reveal</label>
-            <input type="number" min="2" max="30" class="form-control" id="gameRevealTurns" aria-describedby="gameRevealTurns" placeholder="17">
+            <input type="number" min="2" max="30" class="form-control" id="gameRevealTurns" aria-describedby="gameRevealTurns" value="17">
             <small class="form-text text-muted">The full board will be opened for everyone after this many turns.</small>
           </div>
 
@@ -124,6 +125,7 @@
 
 
   class Game {
+    id = "";
     name = "";
     winner = "";
     currPIdx = 0;
@@ -169,11 +171,27 @@ window.addEventListener('load', async function() {
       players.push(playerObj);
     }
     
+
+    var array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+
+    var hashids = new Hashids("berlinspies", 8, "abcdefghijklmnopqrstuvwxyz1234567890");
+    var id = hashids.encode(...array).toString();
+    
     var newGame = new Game();
+    newGame.id = id;
     newGame.name = newGameName;
     newGame.lastTurn = gameEndTurns;
     newGame.noBlindGap = gameRevealTurns;
     newGame.players = players;
+
+    console.log(newGame);
+
+    var newGameJson = JSON.stringify(newGame);
+    var options = { encrypt: false };
+    var newGameOnCloud = await session.putFile(`${id}.json`, newGameJson, options);
+    
+    console.log(newGameOnCloud);
 
   });
 
